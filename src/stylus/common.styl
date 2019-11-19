@@ -1,0 +1,246 @@
+
+.handle-container {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 10px;
+
+    .search-wrapper {
+        display: flex;
+        flex: 1;
+
+        .search-form {
+            text-align: left;
+
+            .ivu-form-item {
+                margin-bottom: 15px !important;
+            }
+        }
+
+        .btns {
+            flex: 0 0 180px;
+            padding-left: 20px;
+            box-sizing: border-box;
+        }
+    }
+}
+
+.page-wrapper {
+    padding-top: 10px;
+    position: relative;
+    text-align: center;
+}
+
+.danger-color {
+    color: #ed4014;
+}
+
+.title-color {
+    color: #17233d;
+}
+
+.info-color {
+    color: #2db7f5;
+}
+
+.success-color {
+    color: #19be6b;
+}
+
+.warning-color {
+    color: #ff9900;
+}
+
+.ivu-card .page-wrapper {
+    font-size: 12px;
+}
+
+.win-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px;
+    overflow: auto;
+    display: flex;
+    flex-flow: column;
+
+    .win-table-wrapper {
+        flex: 1;
+        overflow: auto;
+    }
+}
+
+.handle-br {
+    display: block !important;
+    z-index: 999999;
+    bottom: 0;
+    right: 0;
+    background: none;
+    border: none;
+}
+
+// 表格不同状态显示的颜色
+.cell-primary {
+    color: #2d8cf0;
+}
+
+.cell-info {
+    color: #2db7f5;
+}
+
+.cell-success {
+    color: #19be6b;
+}
+
+.cell-warning {
+    color: #ff9900;
+}
+
+.cell-error {
+    color: #ed4014;
+}
+
+.cell-title {
+    color: #17233d;
+}
+
+.cell-sub-title {
+    color: #808695;
+}
+
+.cell-bg-primary {
+    background: #2d8cf0;
+}
+
+.cell-bg-info {
+    background: #2db7f5;
+}
+
+.cell-bg-success {
+    background: #19be6b;
+}
+
+.cell-bg-warning {
+    background: #ff9900;
+}
+
+.cell-bg-error {
+    background: #ed4014;
+}
+
+.cell-bg-title {
+    background: #17233d;
+}
+
+.cell-bg-sub-title {
+    background: #808695;
+}
+
+.cell-bg-primary-light {
+    background: lighten(#2d8cf0, 90%);
+}
+
+.cell-bg-info-light {
+    background: lighten(#2db7f5, 90%);
+}
+
+.cell-bg-success-light {
+    background: lighten(#19be6b, 90%);
+}
+
+.cell-bg-warning-light {
+    background: lighten(#ff9900, 90%);
+}
+
+// tab表格
+.tab-wrapper {
+    width: 100%;
+    border: 1px solid #eee;
+    border-bottom: none;
+
+    .row {
+        min-height: 40px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+
+        .item {
+            flex: 1;
+            display: flex;
+            border-right: 1px solid #eee;
+            font-size: 13px;
+
+            .label {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                padding: 0 10px;
+                flex: 0 0 120px;
+                border-right: 1px solid #eee;
+                color: #17233d;
+                background: #f9f9f9;
+
+                i {
+                    margin-right: 5px;
+                    font-size: 14px;
+                    color: #17233d;
+                }
+            }
+
+            .text {
+                flex: 1;
+                padding: 0 10px;
+                display: flex;
+                align-items: center;
+                color: #515a6e;
+            }
+        }
+
+        .item:nth-last-child(1) {
+            border-right: none !important;
+        }
+    }
+}
+
+.tab-title {
+    margin: 30px 0 10px 0;
+    height: 40px;
+    padding: 0 10px;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+    font-size: 16px;
+    color: #17233d;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    i {
+        margin-right: 6px;
+        color: #515a6e;
+    }
+
+    span {
+        color: #515a6e;
+    }
+}
+
+.select-right-span-disabled {
+    float: right;
+    padding-right: 20px;
+}
+
+.select-right-span {
+    float: right;
+    // color: #666;
+    padding-right: 20px;
+}
+
+.ivu-input[disabled], fieldset[disabled] .ivu-input {
+    color: #666 !important;
+}
+.ivu-message{
+    z-index: 100000!important; 
+}
+.viewer-canvas{
+  z-index: 100000!important;
+}

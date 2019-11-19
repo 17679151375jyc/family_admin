@@ -1,0 +1,71 @@
+{
+    "name": "new-admin",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "dev-build": "vue-cli-service build --mode development",
+        "test-build": "vue-cli-service build --mode test",
+        "build": "vue-cli-service build",
+        "lint": "vue-cli-service lint"
+    },
+    "dependencies": {
+        "axios": "^0.19.0",
+        "core-js": "^2.6.5",
+        "cos-js-sdk-v5": "^0.5.11",
+        "emoji": "^0.3.2",
+        "file-saver": "^2.0.2",
+        "moment": "^2.24.0",
+        "qrcodejs2": "0.0.2",
+        "tree-table-vue": "^1.1.0",
+        "v-viewer": "^1.4.2",
+        "view-design": "^4.0.2",
+        "vue": "^2.6.10",
+        "vue-amap": "^0.5.10",
+        "vue-draggable-resizable": "^2.0.0-rc1",
+        "vue-json-viewer": "^2.2.4",
+        "vue-router": "^3.0.3",
+        "vuex": "^3.0.1",
+        "vuex-persistedstate": "^2.5.4",
+        "wangeditor": "^3.1.1",
+        "xlsx": "^0.13.3",
+        "yxg-xlsx-style": "^0.0.1"
+    },
+    "devDependencies": {
+        "@vue/cli-plugin-babel": "^3.7.0",
+        "@vue/cli-plugin-eslint": "^3.7.0",
+        "@vue/cli-service": "^3.7.0",
+        "babel-eslint": "^10.0.1",
+        "eslint": "^5.16.0",
+        "eslint-plugin-vue": "^5.0.0",
+        "less": "^3.10.3",
+        "less-loader": "^5.0.0",
+        "script-loader": "^0.7.2",
+        "stylus": "^0.54.5",
+        "stylus-loader": "^3.0.2",
+        "vue-template-compiler": "^2.5.21"
+    },
+    "eslintConfig": {
+        "root": true,
+        "env": {
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/essential",
+            "eslint:recommended"
+        ],
+        "rules": {},
+        "parserOptions": {
+            "parser": "babel-eslint"
+        }
+    },
+    "postcss": {
+        "plugins": {
+            "autoprefixer": {}
+        }
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions"
+    ]
+}

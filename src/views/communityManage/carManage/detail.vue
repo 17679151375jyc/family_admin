@@ -1,0 +1,269 @@
+<!--审核-->
+<template>
+  <Modal
+    title="详情"
+    v-model.trim="isShow"
+    :mask-closable="false"
+    :loading="loading"
+    :closable="false"
+    footer-hide
+    width="800"
+  >
+    <!-- 右上角关闭按钮-start -->
+    <a class="ivu-modal-close" @click="handleClose">
+      <i class="ivu-icon ivu-icon-ios-close"></i>
+    </a>
+    <!-- 右上角关闭按钮-start -->
+    <div class="tab-wrapper">
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconjianzhuwu"></i>
+            <span>所属小区</span>
+          </div>
+          <div class="text">{{info.plotName}}</div>
+        </div>
+
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconcheliang-"></i>
+            <span>车辆号码</span>
+          </div>
+          <div class="text">{{info.carNumber}}</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconyonghu"></i>
+            <span>所属人</span>
+          </div>
+          <div class="text">{{info.carownName}}</div>
+        </div>
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconshouji"></i>
+            <span>联系电话</span>
+          </div>
+          <div class="text">
+            <span>{{info.carownPhone}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconshijian"></i>
+            <span>创建时间</span>
+          </div>
+          <div class="text">{{this.$moment(info.createTime*1000).format('YYYY-MM-DD HH:mm:ss')}}</div>
+        </div>
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconshijian"></i>
+            <span>更新时间</span>
+          </div>
+          <div class="text">{{this.$moment(info.updateTime*1000).format('YYYY-MM-DD HH:mm:ss')}}</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconstatus"></i>
+            <span>状态</span>
+          </div>
+          <div class="text">{{info.status | statusName('UserCarStatus')}}</div>
+        </div>
+        <div class="item" v-if='info.status == 2'>
+          <div class="label">
+            <i class="iconfont iconxiaoxi2"></i>
+            <span>不通过原因</span>
+          </div>
+          <div class="text">{{info.remark}}</div>
+        </div>
+      </div>
+    </div>
+  </Modal>
+</template>
+<script>
+import { getCarDetail, updateCar} from "@/api/communityManage";
+let that;
+export default {
+  props: {
+    id: {
+      type: Number,
+      default: ""
+    },
+    isShow: {
+      type: Boolean,
+      default: false
+    },
+    loading: {
+      type: Boolean,
+      default: true
+    }
+  },
+  data() {
+    return {
+      UserCarStatus: this.$options.filters.statusList("UserCarStatus"),
+      searchForm: {
+        plotNumber: null,
+        buildingNumber: null,
+        doorNumber: null
+      },
+      tabIsLoading: false,
+      page: {
+        total: 0,
+        size: this.$config.page.size,
+        sizeOpts: this.$config.page.sizeOpts,
+        current: 1
+      },
+      manageList: [], //物管列表
+      subIsShow: false,
+      info: {},
+      form: {
+        status: null,
+        remark: ''
+      },
+      failureList: []
+    };
+  },
+  computed: {
+    rules: function() {
+      console.log(this.form);
+      return {
+        status: [
+          {
+            type: "number",
+            required: true,
+            message: "请选择要修改的状态",
+            trigger: "blur"
+          }
+        ],
+        remark: [
+          {
+            validator: (rule, value, callback, source, options) => {
+              let err = [];
+              if (this.form.status === 2 && !value) {
+                err = "请选择不通过的原因";
+              }
+
+              callback(err);
+            }
+          }
+        ]
+      };
+    },
+  },
+  watch: {
+    isShow: function(val, oldVal) {
+      if (val) {
+        this.getDetail();
+      }
+    }
+  },
+  created() {
+    that = this;
+  },
+  methods: {
+    /**
+     * 获取数据详情
+     */
+    getDetail() {
+      getCarDetail({
+        id: this.id
+      }).then(({ data, errorCode }) => {
+        if (errorCode === 0) {
+          this.info = data;
+        }
+      });
+    },
+    handleClose() {
+      this.$emit("handleClose");
+    },
+    changeStatus(status) {
+      if (status === 3 && !this.info.remarkReason) {
+        // status为1即通过，为2不通过
+        this.$Message.error("请填写审核不通过的原因备注");
+      } else {
+        this.subIsShow = true;
+        let { id, status, feedback } = this.form;
+        updateApplyStatus({
+          status: status,
+          remark: remarkReason,
+          number: number
+        })
+          .then(({ data, errorCode }) => {
+            this.subIsShow = false;
+            if (errorCode === 0) {
+              this.$Message.success("修改成功");
+              this.$emit("handleClose", true);
+            }
+          })
+          .catch(() => {
+            this.subIsShow = false;
+          });
+      }
+    },
+    submit() {
+      this.$refs["form"].validate(async valid => {
+        if (valid) {
+          this.subIsShow = true;
+          let { status, remark} = this.form;
+          updateCar({
+            id: this.id,
+            status, 
+            remark
+          })
+            .then(({ data, errorCode }) => {
+              this.subIsShow = false;
+              if (errorCode === 0) {
+                this.$Message.success("审核成功");
+                this.$emit("handleClose", true);
+              }
+            })
+            .catch(() => {
+              this.subIsShow = false;
+            });
+        } else {
+          this.$Message.error("提交信息有误");
+        }
+      });
+    }
+  }
+};
+</script>
+<style lang="stylus" scoped>
+.flex-imgs {
+  width: 100px;
+  height: 130px;
+  display: inline-block;
+  margin-right: 10px;
+
+  .img-item {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+
+    img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
+
+  span {
+    display: block;
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+  }
+}
+</style>
+
+
