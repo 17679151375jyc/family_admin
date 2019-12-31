@@ -24,7 +24,7 @@
             </div>
             <div class="text">{{ info.createTime }}</div>
           </div>
-          <div class="item">
+          <div class="item" v-if="info.type!=2">
             <div class="label">
               <i class="iconfont iconshijian01"></i>
               <span>服务到期时间</span>
@@ -101,7 +101,7 @@
               <span>用户分类</span>
             </div>
             <div class="text">
-              {{info.type}}
+              {{info.type | statusName('AreaType')}}
             </div>
           </div>
         </div>
@@ -141,11 +141,6 @@ export default {
   },
   data() {
     return {
-      typeList: {
-        0: "安防",
-        1: "商铺",
-        2: "备城门"
-      },
       mapIsShow: false,
       info: {
         address: null, // 地址
@@ -223,7 +218,7 @@ export default {
             plotName, //小区名称
             provinceName, //省名
             streetName, //街道名
-            type: this.typeList[type], // 类型，0安防，1商铺，2备城门
+            type, // 类型，0安防，1商铺，2备城门
             zoneName, //区名
             longitude,
             latitude

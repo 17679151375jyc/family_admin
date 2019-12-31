@@ -44,19 +44,12 @@
         <div class="item">
           <div class="label">
             <i class="iconfont iconzhujiruqinfangyu"></i>
-            <span>防区序列</span>
+            <span>防区编号</span>
           </div>
-          <div class="text">{{info.defenceIndex}}</div>
+          <div class="text">{{info.defenceIndex - 0 >= 10 ? info.defenceIndex : 0 + '' + info.defenceIndex}}</div>
         </div>
       </div>
       <div class="row">
-        <div class="item">
-          <div class="label">
-            <i class="iconfont iconzhujiruqinfangyu"></i>
-            <span>是否学习</span>
-          </div>
-          <div class="text">{{info.study ? '已学习' : '未学习'}}</div>
-        </div>
         <div class="item">
           <div class="label">
             <i class="iconfont iconzhujiruqinfangyu"></i>
@@ -64,6 +57,15 @@
           </div>
           <div class="text">{{info.position}}</div>
         </div>
+        <div class="item">
+              <div class="label">
+                  <i class="iconfont iconzhujiruqinfangyu"></i>
+                  <span>关联视频主机名称</span>
+              </div>
+              <div class="text">
+                  {{cameraNames}}
+              </div>
+          </div>
       </div>
     </div>
   </Modal>
@@ -84,6 +86,12 @@ export default {
     loading: {
       type: Boolean,
       default: true
+    },
+    cameraList: {
+        type: Array, 
+        default: function () {
+            return []
+        }
     }
   },
 
@@ -100,7 +108,15 @@ export default {
       }
     };
   },
-  computed: {},
+  computed: {
+      cameraNames: function () {
+          let cameraNames = []
+          for(let i = 0; i < this.cameraList.length; i++) {
+            cameraNames.push(this.cameraList[i].name)
+          }
+          return cameraNames.join('、')
+      }
+  },
   watch: {
     isShow: async function(val, oldVal) {
       if (val) {
@@ -139,6 +155,15 @@ export default {
 
 >>>.ivu-tree-children>li {
   margin-top: 0;
+}
+.tab-wrapper{
+    .row{
+        .item{
+            .label{
+                flex: 0 0 160px;
+            }
+        }
+    }
 }
 </style>
 

@@ -1,119 +1,173 @@
 <template>
-  <Modal title="编辑" v-model.trim="isShow" :mask-closable="false" :loading="loading" :closable="false">
-    <!-- 右上角关闭按钮-start -->
-    <a class="ivu-modal-close" @click="handleClose">
-      <i class="ivu-icon ivu-icon-ios-close"></i>
-    </a>
-    <!-- 右上角关闭按钮-start -->
-
+  <Modal title="编辑" v-model.trim="visible" :mask-closable="false">
     <Form ref="form" :model="form" :rules="rules" :label-width="80">
-      <FormItem prop="userName" label="账号">
-        <Input v-model.trim="form.userName" placeholder="输入账号" style="width: 200px;" disabled/>
+      <FormItem label="手机账号">
+        <span>{{form.phone}}</span>
       </FormItem>
-      <FormItem prop="roleId" label="所属角色">
-        <Select v-model.trim="form.roleId" placeholder="请选择所属角色" style="width: 200px;">
-          <Option v-for="(item,index) in roleList" :key="index" :value="item.id">{{item.roleName}}</Option>
+      <FormItem prop="headPortrait" label="头像">
+        <upload v-model="form.headPortrait"></upload>
+      </FormItem>
+      <FormItem prop="nickName" label="昵称">
+        <Input v-model.trim="form.nickName" placeholder="输入昵称" style="width: 200px;" />
+      </FormItem>
+      <FormItem prop="realName" label="真实姓名">
+        <Input v-model.trim="form.realName" placeholder="输入真实姓名" style="width: 200px;" />
+      </FormItem>
+      <FormItem prop="identityCard" label="身份证号">
+        <Input v-model.trim="form.identityCard" placeholder="输入身份证" style="width: 200px;" />
+      </FormItem>
+      <FormItem prop="businessNumber" label="对应商家">
+        <Select
+          v-model="form.businessNumber"
+          filterable
+          style="width: 200px;"
+          placeholder="商家账号才需要选择"
+        >
+          <Option
+            v-for="item in businessList"
+            :value="item.id"
+            :key="item.id"
+          >{{ item.businessName }}</Option>
         </Select>
       </FormItem>
     </Form>
 
     <div slot="footer">
-      <Button type="text" @click="handleClose">取消</Button>
-      <Button type="primary" @click="submit" :loading="subIsShow">确定</Button>
+      <Button type="text" @click="visible=false">取消</Button>
+      <Button type="primary" @click="submit" :loading="subIsLoading">确定</Button>
     </div>
   </Modal>
 </template>
 <script>
-import {
-  updateAccount,
-  getRoleList,
-  getAccountDetail
-} from "@/api/systemSetup";
+import { getClientUserDetail, updateClientUser } from "@/api/userManage";
+import Upload from "@/components/upload/upload";
+import { getBusinessList } from "@/api/dataManage";
 export default {
+  components: {
+    Upload
+  },
   props: {
-    id: {
-      type: Number,
-      default: null
-    },
-    isShow: {
+    value: {
       type: Boolean,
       default: false
     },
-    loading: {
-      type: Boolean,
-      default: true
+    userNumber: {
+      type: String,
+      default: null
     }
   },
   data() {
     return {
-      roleList: [],
-      subIsShow: false,
+      visible: false,
+      subIsLoading: false,
+      businessList: [],
       form: {
-        userName: "",
-        roleId: ""
+        id: null,
+        nickName: null,
+        headPortrait: null,
+        realName: null,
+        identityCard: null,
+        businessNumber: null
       },
       rules: {
-        roleId: [
+        nickName: [
           {
-            type: "number",
-            required: true,
-            message: "请选择对应的角色",
-            trigger: "blur"
+            validator: (rule, value, callback) => {
+              let err = [];
+              if (value && value.length > 13) {
+                err = "请填写少于13位字符的昵称";
+              }
+              callback(err);
+            }
+          }
+        ],
+        realName: [
+          {
+            validator: (rule, value, callback) => {
+              let err = [];
+              if (value && !this.$options.filters.realName(value)) {
+                err = "请填写2-4位中文名";
+              }
+              callback(err);
+            }
+          }
+        ],
+        identityCard: [
+          {
+            validator: (rule, value, callback) => {
+              let err = [];
+              if (value && !this.$options.filters.identityCard(value)) {
+                err = "请填写正确的身份证号";
+              }
+              callback(err);
+            }
           }
         ]
       }
     };
   },
   watch: {
-    isShow: function(val, oldVal) {
-      this.$refs["form"].resetFields();
-      this.getRoleList();
-      this.getDetail();
+    value(val) {
+      if (val) {
+        this.getDetail();
+        this.getBusinessList();
+      } else {
+        this.$refs["form"].resetFields();
+      }
+      this.visible = val;
+    },
+    visible(val) {
+      this.$emit("input", val);
     }
+    // isShow: function(val, oldVal) {
+    //   this.$refs["form"].resetFields();
+    //   this.getDetail();
+    // }
   },
   methods: {
     /**
-     * @method getRoleList 获取角色列表
+     * 拉取商家列表
      */
-    getRoleList() {
-      getRoleList({}).then(({ data: { list }, errorCode }) => {
+    getBusinessList() {
+      getBusinessList({
+        input:{
+            isEffective: 1,
+        },
+        pageSize: 999,
+        page: 1
+      }).then(({ data, errorCode }) => {
         if (errorCode === 0) {
-          this.roleList = list;
+          this.businessList = data.list;
         }
       });
     },
+    /**
+     * 获取用户详情
+     */
     getDetail() {
       // 获取账号详情
-      getAccountDetail({
-        objId: this.id
-      }).then(({ data: { userName, roleId }, errorCode }) => {
+      getClientUserDetail({
+        userNumber: this.userNumber
+      }).then(({ data, errorCode }) => {
         if (errorCode === 0) {
-          this.form.userName = userName;
-          this.form.roleId = roleId;
+          this.form = data;
         }
       });
-    },
-    handleClose() {
-      this.$emit("handleClose");
     },
     submit() {
       this.$refs["form"].validate(async valid => {
         if (valid) {
-          let { roleId } = this.form;
-          this.subIsShow = true;
-          updateAccount({
-            objId: this.id,
-            roleId: roleId
-          })
+          this.subIsLoading = true;
+          updateClientUser(this.form)
             .then(({ errorCode }) => {
               if (errorCode === 0) {
                 this.$Message.success("修改成功");
-                this.subIsShow = false;
-                this.$emit("handleClose", true);
+                this.subIsLoading = false;
+                this.visible = false;
               }
             })
             .catch(err => {
-              this.subIsShow = false;
+              this.subIsLoading = false;
             });
         } else {
           this.$Message.error("提交信息有误");

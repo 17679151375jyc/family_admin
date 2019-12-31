@@ -22,16 +22,6 @@
           </div>
           <div class="text">{{info.companyName}}</div>
         </div>
-
-        <div class="item">
-          <div class="label">
-            <i class="iconfont icondianshi-f"></i>
-            <span>电视编号</span>
-          </div>
-          <div class="text">{{info.tvNo ? info.tvNo : '无'}}</div>
-        </div>
-      </div>
-      <div class="row">
         <div class="item">
           <div class="label">
             <i class="iconfont iconyonghu"></i>
@@ -39,13 +29,22 @@
           </div>
           <div class="text">{{info.name}}</div>
         </div>
-
+      </div>
+      <div class="row">
         <div class="item">
           <div class="label">
             <i class="iconfont iconId"></i>
             <span>身份证号</span>
           </div>
           <div class="text">{{info.credentialNo}}</div>
+        </div>
+
+        <div class="item">
+          <div class="label">
+            <i class="iconfont icondianshi-f"></i>
+            <span>小区名称</span>
+          </div>
+          <div class="text">{{info.plotName ? info.plotName : '无'}}</div>
         </div>
       </div>
       <div class="row">
@@ -99,7 +98,6 @@
           </div>
           <div class="text">{{info.fsUserPhone}}</div>
         </div>
-        
       </div>
       <div class="row">
         <div class="item">
@@ -124,18 +122,17 @@
           <div
             class="text"
           >{{info.settleAccountsType ? $config.installManage.installApply.settleAccountsType[info.settleAccountsType].name : ''}}</div>
-        </div>         -->
+        </div>-->
       </div>
-      
 
-      <div class="row">   
+      <div class="row">
         <div class="item">
           <div class="label">
             <i class="iconfont iconliwu--"></i>
             <span>套餐名</span>
           </div>
           <div class="text">{{info.applyPackage?info.applyPackage.name:''}}</div>
-        </div>     
+        </div>
         <div class="item">
           <div class="label">
             <i class="iconfont iconzhifu"></i>
@@ -159,7 +156,7 @@
             <span>押金</span>
           </div>
           <div class="text">{{info.deposit?info.deposit.toFixed(2):''}}</div>
-        </div>               
+        </div>
       </div>
 
       <div class="row">
@@ -169,15 +166,15 @@
             <span>总金额</span>
           </div>
           <div class="text">{{info.orderPrice?info.orderPrice.toFixed(2):''}}</div>
-        </div> 
+        </div>
         <!-- <div class="item">
           <div class="label">
             <i class="iconfont iconmiaoshu"></i>
             <span>备注</span>
           </div>
           <div class="text">{{ info.remark }}</div>
-        </div>  -->        
-      </div>      
+        </div>-->
+      </div>
       <div class="row">
         <div class="item">
           <div class="label">
@@ -388,12 +385,12 @@ export default {
         tvNo: null, // 电视编号
         updateTime: null,
         withholdAccountType: null, //代扣帐号类型1.新增/更改帐号 2.使用原帐号
-        deposit: null,  // 押金
-        isPay: null,  //是否支付
+        deposit: null, // 押金
+        isPay: null, //是否支付
         orderPrice: null, //总金额
-        testType: null,//是否测试（true为测试，false为正式）
-        remark: null,//备注
-        settleAccountsType: null,//支付类型
+        testType: null, //是否测试（true为测试，false为正式）
+        remark: null, //备注
+        settleAccountsType: null //支付类型
       },
       form: {
         id: null,
@@ -478,15 +475,11 @@ export default {
     tabData: function() {
       let data = [];
       for (let i = 0; i < this.info.applyDevices.length; i++) {
-        let {
+        let { name, num, price } = this.info.applyDevices[i];
+        data.push({
           name,
           num,
-          price
-        } = this.info.applyDevices[i]
-        data.push({  
-          name,        
-          num,
-          price: price ? price.toFixed(2):''
+          price: price ? price.toFixed(2) : ""
         });
       }
       return data;
@@ -520,15 +513,11 @@ export default {
       let data = [];
       if (this.info.applyPackage) {
         for (let i = 0; i < this.info.applyPackage.applyDevices.length; i++) {
-          let {
+          let { name, num, price } = this.info.applyPackage.applyDevices[i];
+          data.push({
             name,
             num,
-            price
-          } = this.info.applyPackage.applyDevices[i]
-          data.push({  
-            name,        
-            num,
-            price: price ? price.toFixed(2):''
+            price: price ? price.toFixed(2) : ""
           });
         }
       }
@@ -561,24 +550,20 @@ export default {
     },
     supplementData() {
       let data = [];
-      console.log(this.info.otherApplyDevices)
-      if(this.info.otherApplyDevices){
+      console.log(this.info.otherApplyDevices);
+      if (this.info.otherApplyDevices) {
         for (let i = 0; i < this.info.otherApplyDevices.length; i++) {
           for (let j = 0; j < this.info.otherApplyDevices[i].list.length; j++) {
-            let {
+            let { name, num, price } = this.info.otherApplyDevices[i].list[j];
+            data.push({
               name,
               num,
-              price
-            } = this.info.otherApplyDevices[i].list[j]
-            data.push({  
-              name,        
-              num,
-              price: price ? price.toFixed(2):''
+              price: price ? price.toFixed(2) : ""
             });
           }
         }
         return data;
-      }else{
+      } else {
         return [];
       }
     }

@@ -4,12 +4,12 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" inline :label-width="50">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" inline :label-width="50">
           <FormItem label="手机号" prop="phone">
             <Input v-model.trim="searchForm.input.phone" placeholder="输入手机号" style="width:120px;" />
           </FormItem>
         </Form>
-        <Form class="search-form" ref="search-form" inline :label-width="60">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" inline :label-width="60">
           <FormItem label="呼叫类型" prop="type">
             <Select v-model.trim="searchForm.input.type" placeholder="输入呼叫类型" style="width: 120px;">
               <Option
@@ -21,7 +21,7 @@
           </FormItem>
         </Form>
 
-        <Form class="search-form" ref="search-form" inline :label-width="60">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" inline :label-width="60">
           <FormItem label="返回类型">
             <Select v-model.trim="searchForm.input.code" placeholder="输入返回类型" style="width: 120px;">
               <Option

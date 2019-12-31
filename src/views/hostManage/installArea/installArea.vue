@@ -5,6 +5,7 @@
       <div class="search-wrapper">
         <Form
           class="search-form"
+          @keyup.enter.native="search"
           ref="search-form"
           :model="searchForm"
           inline
@@ -69,10 +70,19 @@
     <!-- 编辑内容弹窗-start -->
     <edit @handleClose="editClose" :isShow="edit.isShow" :id="edit.id"></edit>
     <!-- 编辑内容弹窗-end -->
-
+    
     <!-- 编辑内容弹窗-start -->
-    <bind @handleClose="bindClose" :isShow="bind.isShow" :areaNumber='bind.areaNumber' :phone="bind.phone"></bind>
+    <bind
+      @handleClose="bindClose"
+      :isShow="bind.isShow"
+      :areaNumber="bind.areaNumber"
+      :phone="bind.phone"
+    ></bind>
     <!-- 编辑内容弹窗-end -->
+
+    <!-- 添加防盗主机-start -->
+    <add-host v-model="addHost.isShow" :phone="addHost.phone"></add-host>
+    <!-- 添加防盗主机-end -->
   </div>
 </template>
 <script>
@@ -80,6 +90,7 @@ import add from "./add";
 import edit from "./edit";
 import bind from "./bind";
 import detail from "./detail";
+import AddHost from '@/views/hostManage/securityHost/add'
 import { getAreaList } from "@/api/dataManage";
 import { delDefenceAreaBySecurity } from "@/api/hostManage";
 export default {
@@ -97,7 +108,8 @@ export default {
     add,
     edit,
     detail,
-    bind
+    bind,
+    AddHost
   },
   data() {
     return {
@@ -121,6 +133,10 @@ export default {
       edit: {
         isShow: false,
         id: null
+      },
+      addHost: {
+          isShow: false,
+          phone: null
       },
       tabIsLoading: false,
       page: {
@@ -160,33 +176,32 @@ export default {
           title: "到期时间",
           key: "effectiveTime",
           width: 150,
-          render: (h, params) => {
+          render: (h, {row: {effectiveTime}}) => {
             let divs = [
               h(
                 "div",
                 {
                   class: {
-                    "cell-error":
-                      params.row.effectiveTime * 1000 < new Date().getTime()
+                    "cell-error": effectiveTime * 1000 < new Date().getTime()
                   }
                 },
-                this.$moment(params.row.effectiveTime * 1000).format(
+                effectiveTime ? this.$moment(effectiveTime * 1000).format(
                   "YYYY-MM-DD HH:mm:ss"
-                )
+                ) : ''
               )
             ];
-            if (params.row.effectiveTime * 1000 < new Date().getTime()) {
+            if (effectiveTime * 1000 < new Date().getTime()) {
               divs.push(
                 h(
                   "div",
                   {
                     class: {
                       "cell-error":
-                        params.row.effectiveTime * 1000 < new Date().getTime()
+                        effectiveTime * 1000 < new Date().getTime()
                     }
                   },
                   "已过期" +
-                    this.$moment(params.row.effectiveTime * 1000).toNow(true)
+                    this.$moment(effectiveTime * 1000).toNow(true)
                 )
               );
             }
@@ -241,7 +256,7 @@ export default {
           title: "操作",
           key: "handle",
           width: 180,
-          align: "center",
+          align: "left",
           fixed: "right",
           render: (h, params) => {
             let btnGroup = [];
@@ -254,7 +269,7 @@ export default {
                     size: "small"
                   },
                   style: {
-                    marginRight: "5px"
+                    margin: "2px"
                   },
                   on: {
                     click: () => {
@@ -266,7 +281,10 @@ export default {
               );
               btnGroup.push(btn);
             }
-            if (this.$options.filters.auth(["hostM.installArea.edit"])) {
+            if (
+              this.$options.filters.auth(["hostM.installArea.edit"]) &&
+              params.row.type != 2
+            ) {
               let btn = h(
                 "Button",
                 {
@@ -275,7 +293,7 @@ export default {
                     size: "small"
                   },
                   style: {
-                    marginRight: "5px"
+                    margin: "2px"
                   },
                   on: {
                     click: () => {
@@ -316,8 +334,8 @@ export default {
                 ]
               );
               btnGroup.push(btn);
-            }            
-            if (true) {
+            }
+            if (this.$options.filters.auth(['hostM.security.add'])) {
               let btn = h(
                 "Button",
                 {
@@ -326,7 +344,31 @@ export default {
                     size: "small"
                   },
                   style: {
-                    margin: "2px 5px 2px 0"
+                    margin: "2px"
+                  },
+                  on: {
+                    click: () => {
+                      this.addSecurityHost(params.row.userPhone);
+                    }
+                  }
+                },
+                "添加主机"
+              );
+              btnGroup.push(btn);
+            }
+            if (
+              !params.row.isHasInstall &&
+              this.$options.filters.auth(["hostM.installArea.bind"])
+            ) {
+              let btn = h(
+                "Button",
+                {
+                  props: {
+                    type: "info",
+                    size: "small"
+                  },
+                  style: {
+                    margin: "2px"
                   },
                   on: {
                     click: () => {
@@ -338,62 +380,10 @@ export default {
               );
               btnGroup.push(btn);
             }
-            return h("div", btnGroup);
+            return h("div", { style: { margin: "2px" } }, btnGroup);
           }
         }
       ];
-    },
-    tabData: function() {
-      let tabData = [];
-      console.log(this.list);
-      for (let i = 0; i < this.list.length; i++) {
-        let {
-          userPhone, // 用户手机号
-          areaName, // 区域名称
-          address, //地址
-          provinceName, // 省名称
-          cityName, // 市名称
-          regionName, // 区域名
-          streetName, // 街道名称
-          plotName, // 小区名称
-          buildingName, // 楼座名
-          doorName, //门号名
-          zoneName,
-          type,
-          createTime,
-          effectiveTime // 服务到期时间
-        } = this.list[i];
-        tabData.push({
-          userPhone, // 用户手机号
-          areaName, // 区域名称
-          effectiveTime:
-            this.$options.filters.formatTime(effectiveTime, "Y-M-D") +
-            (effectiveTime <
-            new Date()
-              .getTime()
-              .toString()
-              .substr(0, 10)
-              ? "(已过期)"
-              : ""),
-          address: provinceName + cityName + zoneName + streetName + address, //地址
-          plotName, // 小区名称
-          buildingName, // 楼座名
-          doorName, //门号名
-          type,
-          createTime,
-          cellClassName: {
-            effectiveTime:
-              effectiveTime <
-              new Date()
-                .getTime()
-                .toString()
-                .substr(0, 10)
-                ? "cell-error"
-                : ""
-          }
-        });
-      }
-      return tabData;
     }
   },
   mounted() {
@@ -402,6 +392,11 @@ export default {
     // this.getRoleList();
   },
   methods: {
+    addSecurityHost(phone) {
+      // 调用bindHost
+      this.addHost.isShow = true
+      this.addHost.phone = phone
+    },
     /**
      * @method getList 获取当前的数据列表
      */
@@ -433,12 +428,12 @@ export default {
           this.tabIsLoading = false;
         });
     },
-    bindClose(){
+    bindClose() {
       this.bind.isShow = false;
       this.getList();
     },
-    showBind(val){
-      let { userPhone, areaNumber } = this.list[val]
+    showBind(val) {
+      let { userPhone, areaNumber } = this.list[val];
       console.log(userPhone);
       this.bind.phone = userPhone;
       this.bind.areaNumber = areaNumber;
@@ -559,9 +554,21 @@ export default {
 };
 </script>
 <style lang="stylus" scoped>
+
+
+
 // .win-wrapper {
+
+
+
 //   position: relative;
+
+
+
 // }
+
+
+
 </style>
 
 

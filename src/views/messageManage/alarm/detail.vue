@@ -511,7 +511,7 @@ export default {
     videoStartTime: function() {
       if (this.info.createTime) {
         return this.$moment((this.info.createTime - 30) * 1000).format(
-          "YYYYMMDDhhmmss"
+          "YYYYMMDDHHmmss"
         );
       } else {
         return "";
@@ -520,7 +520,7 @@ export default {
     videoEndTime: function() {
       if (this.info.createTime) {
         return this.$moment((this.info.createTime + 30) * 1000).format(
-          "YYYYMMDDhhmmss"
+          "YYYYMMDDHHmmss"
         );
       } else {
         return "";

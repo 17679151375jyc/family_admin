@@ -3,7 +3,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="80">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="80">
           <FormItem label="省市区街道">
             <div style="display: flex;">
               <address-cascader

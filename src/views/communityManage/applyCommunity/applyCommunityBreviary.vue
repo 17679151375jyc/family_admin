@@ -1,7 +1,7 @@
 <!--摘要列表-->
 <template>
-  <div class="list-wrapper" style='position: relative;'>
-    <Spin size="large" style='position: absolute;left: 48%;top: 150px' v-if='tabIsLoading'></Spin>
+  <div class="list-wrapper" style="position: relative;">
+    <Spin size="large" style="position: absolute;left: 48%;top: 150px" v-if="tabIsLoading"></Spin>
     <div class="list-items">
       <div class="item" v-for="(item, index) in list" :key="index">
         <div class="time">{{item.applyTime|formatTime}}</div>
@@ -16,7 +16,7 @@
         </div>
       </div>
       <div v-if="list.length===0" class="nodata_css">
-        <img src="@/assets/images/community/nodata_img.png">
+        <img src="@/assets/images/community/nodata_img.png" />
         <div>暂无数据</div>
       </div>
     </div>
@@ -140,6 +140,7 @@ export default {
       this.tabIsLoading = true;
       let { size, current } = this.page;
       let data = {
+        deleteStatus: 0,
         pageSize: size,
         page: current
       };
@@ -410,15 +411,18 @@ export default {
     height: 42px;
   }
 }
-.nodata_css{
+
+.nodata_css {
   font-size: 16px;
 }
-.nodata_css img{
+
+.nodata_css img {
   width: 50px;
   height: 44px;
   margin-top: 40px;
 }
-.nodata_css div{  
+
+.nodata_css div {
   color: #7D92B3;
   margin-top: 10px;
 }

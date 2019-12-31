@@ -3,7 +3,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="50">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="50" >
           <FormItem label="安装区域码" prop="installCode" :label-width="80">
             <Select v-model.trim="searchForm.installCode" placeholder="主机区域码" style="width:120px;">
               <Option

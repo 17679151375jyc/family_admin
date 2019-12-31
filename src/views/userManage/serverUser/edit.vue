@@ -43,7 +43,7 @@
         prop="securityPlotRelation"
         label="安保服务社区"
         required
-        v-if="form.curRole.includes('security')"
+        v-if="visible && form.curRole.includes('security')"
       >
         <!-- <div
           style="line-height:24px;"
@@ -121,8 +121,8 @@
       </FormItem>
       <FormItem prop="gender" label="性别">
         <RadioGroup v-model="form.gender">
-          <Radio :label="0" disabled>女</Radio>
-          <Radio :label="1" disabled>男</Radio>
+          <Radio :label="0">女</Radio>
+          <Radio :label="1">男</Radio>
         </RadioGroup>
       </FormItem>
       <FormItem prop="identityCard" label="身份证">
@@ -140,7 +140,7 @@
       <FormItem prop="address" label="详细地址">
         <Input v-model.trim="form.address" placeholder="请填写详细地址" style="width: 270px;" />
       </FormItem>
-      <FormItem prop="picFace" label="人脸图像">
+      <FormItem label="人脸图像">
         <upload v-model.trim="form.picFace" pathName="picFace"></upload>
       </FormItem>
       <!-- <FormItem prop="picIdcardFront" label="身份证前面" v-if="form.fsUserRoleType!=2">
@@ -266,6 +266,7 @@ export default {
     },
     visible(val) {
       if (val) {
+        this.isReady = false;
         this.getCompanyList();
         this.getDetail();
       }
@@ -281,10 +282,11 @@ export default {
         this.maintainPC = []; // 当前维保的省市
         this.securityPC = []; // 当前安保的省市
         this.areaList = [];
-        this.form.curRole = []
-        this.form.securityPlotRelation = [];
+        this.form.curRole = [];
+        // this.form.securityList=[]
+        // this.form.securityPlotRelation=[]
       }
-    //   debugger
+      //   debugger
       this.$emit("input", val);
     },
     "form.curRole": {
@@ -310,8 +312,11 @@ export default {
       }
     },
     "form.securityCityCode": async function(val) {
-      //   this.securityPlotList = [];
-      //   this.form.securityPlotRelation = [];
+      if (this.isReady) {
+        this.securityPlotList = [];
+        this.form.securityPlotRelation = [];
+      }
+
       if (val) {
         this.securityPlotList = await this.getPlotList(
           "",
@@ -817,6 +822,7 @@ export default {
         userNumber: this.number
       }).then(({ data, errorCode }) => {
         if (errorCode === 0) {
+          this.form.securityList=[] // 清空之前的数据
           this.form = Object.assign(this.form, data);
           // 维保服务街道复现之前数据选项
           if (this.form.maintainList) {

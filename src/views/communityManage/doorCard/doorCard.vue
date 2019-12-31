@@ -4,16 +4,18 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="80">
-          <FormItem label="小区" v-if="!curPlotNumber">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="80">
+          <FormItem label="小区楼座" v-if="!curPlotNumber" :label-width="60">
             <address-cascader
               ref="addressCascader"
               @onChange="addressCascaderChange"
-              :showLevel="5"
-              style="width: 250px"
+              :showAllText="true"
+              :showAllTextLevel="2"
+              :showLevel="7"
+              style="width: 380px"
             ></address-cascader>
           </FormItem>
-          <FormItem prop="input.cardNumber" label="卡号">
+          <FormItem prop="input.cardNumber" label="卡号" :label-width="40">
             <Input
               v-model.trim="searchForm.input.cardNumber"
               placeholder="请填入卡号"
@@ -24,6 +26,12 @@
             <Select v-model.trim="searchForm.input.effective" style="width:120px;">
               <Option :value="1">有效</Option>
               <Option :value="0">无效</Option>
+            </Select>
+          </FormItem>
+          <FormItem label="门卡类型">
+            <Select v-model.trim="searchForm.input.status" style="width:120px;">
+              <Option :value="0">小区卡</Option>
+              <Option :value="1">业主卡</Option>
             </Select>
           </FormItem>
         </Form>
@@ -42,8 +50,9 @@
       </div>
     </div>
     <!-- 顶部操作内容-end -->
-
-    <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="list"></Table>
+    <div class="win-table-wrapper" id="win-table-wrapper">
+      <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="list"></Table>
+    </div>
     <Page
       placement="top"
       :total="page.total"
@@ -64,20 +73,24 @@
     <!-- 添加内容弹窗-end -->
 
     <!-- 编辑内容弹窗-start -->
-    <edit @handleClose="editClose" :isShow="edit.isShow" :id="edit.id"></edit>
+    <bind v-model="bind.isShow" :id="bind.id"></bind>
     <!-- 编辑内容弹窗-end -->
   </div>
 </template>
 <script>
-import add from "./add";
-import edit from "./edit";
-import { getDoorCardList, updateDoorCard } from "@/api/communityManage";
+import Add from "./add";
+import Bind from "./bind";
+import {
+  getDoorCardList,
+  updateDoorCard,
+  unbindCard
+} from "@/api/communityManage";
 import { mapState } from "vuex";
 import addressCascader from "@/components/addressCascader/addressCascader";
 export default {
   components: {
-    add,
-    edit,
+    Add,
+    Bind,
     addressCascader
   },
   data() {
@@ -105,7 +118,10 @@ export default {
           streetCode: null,
           plotNumber: null,
           effective: null,
-          cardNumber: null
+          cardNumber: null,
+          buildingNumber: null,
+          doorNumber: null,
+          status: null
         }
       },
       companyTypeList: this.$config.dataManage.company.type,
@@ -113,7 +129,7 @@ export default {
       add: {
         isShow: false
       },
-      edit: {
+      bind: {
         id: null,
         isShow: false
       },
@@ -126,7 +142,12 @@ export default {
       if (!val) {
         this.getList();
       }
-    }
+    },
+    "bind.isShow": function(val) {
+      if (!val) {
+        this.getList();
+      }
+    },
   },
   computed: {
     ...mapState({
@@ -154,7 +175,17 @@ export default {
           width: 120
         },
         {
-          title: "用户类型",
+          title: "楼座",
+          key: "buildingName",
+          width: 120
+        },
+        {
+          title: "门号",
+          key: "doorName",
+          width: 120
+        },
+        {
+          title: "门卡类型",
           key: "type",
           width: 100,
           render: (h, params) => {
@@ -234,80 +265,76 @@ export default {
               )
             );
           }
-        }
-        // {
-        //   title: "操作",
-        //   key: "handle",
-        //   width: 180,
-        //   align: "center",
-        //   fixed: "right",
-        //   render: (h, params) => {
-        //     let btnGroup = [];
-        //     if (this.J_edit) {
-        //       let btn = h(
-        //         "Button",
-        //         {
-        //           props: {
-        //             type: "primary",
-        //             size: "small"
-        //           },
-        //           style: {
-        //             marginRight: "5px"
-        //           },
-        //           on: {
-        //             click: () => {
-        //               this.showEdit(this.list[params.index].id);
-        //             }
-        //           }
-        //         },
-        //         "编辑"
-        //       );
-        //       btnGroup.push(btn);
-        //     }
+        },
+        {
+          title: "操作",
+          key: "handle",
+          width: 150,
+          align: "center",
+          fixed: "right",
+          render: (h, params) => {
+            let btnGroup = [];
+            if (!params.row.phone && this.$options.filters.auth(['communityM.doorCard.bind'])) {
+              let btn = h(
+                "Button",
+                {
+                  props: {
+                    type: "info",
+                    size: "small"
+                  },
+                  style: {
+                    margin: "0 2px"
+                  },
+                  on: {
+                    click: () => {
+                      this.showBind(params.index);
+                    }
+                  }
+                },
+                "绑定"
+              );
+              btnGroup.push(btn);
+            }
 
-        //     if (this.J_del) {
-        //       let btn = h(
-        //         "Poptip",
-        //         {
-        //           props: {
-        //             confirm: true,
-        //             title: "你确定要删除吗?",
-        //             transfer: true
-        //           },
-        //           on: {
-        //             "on-ok": () => {
-        //               this.delItem(this.list[params.index].id);
-        //             }
-        //           }
-        //         },
-        //         [
-        //           h(
-        //             "Button",
-        //             {
-        //               props: {
-        //                 type: "error",
-        //                 size: "small"
-        //               }
-        //             },
-        //             "删除"
-        //           )
-        //         ]
-        //       );
-        //       btnGroup.push(btn);
-        //     }
-        //     return h("div", btnGroup);
-        //   }
-        // }
+            if (params.row.phone && this.$options.filters.auth(['communityM.doorCard.unbind'])) {
+              let btn = h(
+                "Poptip",
+                {
+                  props: {
+                    confirm: true,
+                    title: "你确定要解绑吗?",
+                    transfer: true
+                  },
+                  on: {
+                    "on-ok": () => {
+                      this.unbind(params.index);
+                    }
+                  }
+                },
+                [
+                  h(
+                    "Button",
+                    {
+                      props: {
+                        type: "error",
+                        size: "small"
+                      },
+                      style: {
+                        margin: " 0 2px"
+                      }
+                    },
+                    "解绑"
+                  )
+                ]
+              );
+              btnGroup.push(btn);
+            }
+            return h("div", btnGroup);
+          }
+        }
       ];
       return arr;
     }
-    // tabData: function() {
-    //   let tabData = [];
-    //   for (let i = 0; i < this.list.length; i++) {
-    //     tabData.push(this.list[i]);
-    //   }
-    //   return tabData;
-    // }
   },
   mounted() {
     this.getList();
@@ -349,16 +376,18 @@ export default {
         });
     },
     /**
-     * @method delItem 删除该项数据
+     * @method unbind 删除该项数据
      * @param {Number} index 要删除的内容在列表中的序号
      */
-    delItem(index) {
-      // 删除
-      DelAdvertisementList({
-        id: index
+    // 解绑
+    unbind(index) {
+      let { id } = this.list[index];
+      unbindCard({
+        id: id
       }).then(({ errorCode }) => {
         if (errorCode === 0) {
-          this.$Message.success("删除成功");
+          console.log(id);
+          this.$Message.success("解绑成功");
           this.getList();
         }
       });
@@ -397,22 +426,14 @@ export default {
       }
     },
     /**
-     * @method showEdit 显示编辑弹窗
+     * @method showBind 显示编辑弹窗
      * @param {Number} id 要编辑的数据的对应id
      */
-    showEdit(id) {
-      this.edit.id = id;
-      this.edit.isShow = true;
-    },
-    /**
-     * @method editClose 编辑的弹窗关闭时触发
-     * @param {Boolean} isRefresh 是否需要重新加载列表
-     */
-    editClose(isRefresh = false) {
-      this.edit.isShow = false;
-      if (isRefresh) {
-        this.getList();
-      }
+    showBind(val) {
+      console.log(val);
+      let { id } = this.list[val];
+      this.bind.isShow = true;
+      this.bind.id = id;
     },
     /**
      * @method traverseToTree 把数据转化为树状结构
@@ -457,6 +478,7 @@ export default {
       this.searchForm.daterange = null;
       this.searchForm.startTime = null;
       this.searchForm.endTime = null;
+      this.searchForm.input.status = null;
       this.page.current = 1;
       this.getList();
     },
@@ -469,6 +491,8 @@ export default {
       this.searchForm.input.areaCode = value[2];
       this.searchForm.input.streetCode = value[3];
       this.searchForm.input.plotNumber = value[4];
+      this.searchForm.input.buildingNumber = value[5];
+      this.searchForm.input.doorNumber = value[6];
     },
 
     /**

@@ -4,7 +4,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container" v-if="searchIsShow">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="50">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="50">
           <FormItem label="主机区域码" prop="machineInstallCode" :label-width="80">
             <Select
               v-model.trim="searchForm.machineInstallCode"

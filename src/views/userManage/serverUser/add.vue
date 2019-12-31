@@ -231,6 +231,7 @@ export default {
   watch: {
     value(val) {
       this.visible = val;
+      this.$refs['addressCascader'].resetData()
     },
     visible(val) {
       if (!val) {
@@ -633,7 +634,7 @@ export default {
               this.subIsShow = false;
             });
         } else {
-          this.$Message.error("提交信息有误");
+            this.$Message.error("提交信息有误");
         }
       });
     },

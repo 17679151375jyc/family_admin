@@ -38,6 +38,9 @@
       </FormItem>
 
       <FormItem prop="latitude" label="详细坐标" v-show="false"></FormItem>
+      <FormItem prop="plotPhone" label="联系手机">
+        <Input v-model.trim="form.plotPhone" placeholder="请输入联系手机" style="width:250px;" />
+      </FormItem>
       <FormItem prop="communityCanUse" label="小区类型">
         <RadioGroup v-model.trim="form.communityCanUse">
           <Radio :label="1">用于社区和安装区域</Radio>
@@ -56,7 +59,6 @@
       <FormItem prop="faceCount" label="添加家人人脸个数" v-if='form.communityCanUse'>
         <InputNumber
           :max="9999"
-          :min="5"
           v-model="form.faceCount"
           style="width:250px;"
           placeholder="请输入家人人脸个数"
@@ -65,7 +67,6 @@
       <FormItem prop="accountCount" label="　每户账号个数 （包含邀请家人)" v-if='form.communityCanUse'>
         <InputNumber
           :max="9999"
-          :min="5"
           v-model="form.accountCount"
           style="width:250px;"
           placeholder="请输入每户账号个数"
@@ -112,14 +113,26 @@
           placeholder="请输入访客可预约车辆个数"
         ></InputNumber>
       </FormItem>
-      <FormItem prop="isIdentity" label="访客是否填写身份证" v-if='form.communityCanUse'>
-          <i-switch v-model="form.isIdentity" :true-value="1" :false-value="0">
-              <span slot="open">是</span>
-              <span slot="close">否</span>
-          </i-switch>
+       <FormItem prop="realNameStatus" label="访客是否需填姓名" v-if="form.communityCanUse">
+        <i-switch v-model="form.realNameStatus">
+          <span slot="open">是</span>
+          <span slot="close">否</span>
+        </i-switch>
+      </FormItem>
+      <FormItem prop="idcardStatus" label="访客是否需填身份证" v-if="form.communityCanUse">
+        <i-switch v-model="form.idcardStatus">
+          <span slot="open">是</span>
+          <span slot="close">否</span>
+        </i-switch>
+      </FormItem>
+      <FormItem prop="phoneStatus" label="访客是否需填手机号" v-if="form.communityCanUse">
+        <i-switch v-model="form.phoneStatus">
+          <span slot="open">是</span>
+          <span slot="close">否</span>
+        </i-switch>
       </FormItem>
       <FormItem prop="remark" label="备注">
-        <Input type="textarea" :rows="4" />
+        <Input type="textarea" v-model='form.remark' :rows="4" />
       </FormItem>
     </Form>
 
@@ -173,7 +186,9 @@ export default {
       PayTypeList: this.$options.filters.statusList("PayType"),
       effectiveTime: null,
       form: {
+        id: null,
         plotName: null,
+        plotPhone: null,
         province: null,
         city: null,
         area: null,
@@ -188,37 +203,15 @@ export default {
         communityCanUse: null, // 小区是否用于加入社区
         companyId: null,
         parkId: null,
-        faceCount: 5, // 人脸免费个数
-        accountCount: 5, // 加入社区账号个数
+        faceCount: 3, // 人脸免费个数
+        accountCount: 3, // 加入社区账号个数
         payType: null, // 收费类型
         effectiveTime: null, // 有效时间，收费类型是0，1时为具体时间 ，2时为天数
         remark: null, // 备注
         temporaryCount: 0, //预约车数量
-        isIdentity: 0, // 是否需要填身份证
-      },
-      info: {
-        address: null,
-        areaName: null,
-        area: null,
-        city: null,
-        cityName: null,
-        communityCanUse: null,
-        id: null,
-        latitude: null,
-        longitude: null,
-        plotName: null,
-        plotNumber: null,
-        province: null,
-        provinceName: null,
-        street: null,
-        streetName: null,
-        parkId: null,
-        faceCount: 5, // 人脸免费个数
-        accountCount: 5, // 加入社区账号个数
-        payType: null, // 收费类型
-        effectiveTime: null, // 有效时间，收费类型是0，1时为具体时间 ，2时为天数
-        remark: null, // 备注
-        temporaryCount: 0 //预约车数量
+        idcardStatus: true, // 访客是否需填身份证号
+        realNameStatus: true, // 访客是否需填姓名
+        phoneStatus: true // 访客是否需要填手机号
       }
     };
   },
@@ -243,6 +236,22 @@ export default {
             max: 32,
             message: "长度不超过32个字符",
             trigger: "blur"
+          }
+        ],
+        plotPhone: [
+          {
+            required: true,
+            message: "请填写联系手机",
+            trigger: "blur"
+          },
+          {
+            validator: (rule, value, callback) =>{
+              let err = [];
+              if (!this.$options.filters.phone(value)) {
+                err = "请填写正确的手机号码";
+              }
+              callback(err);
+            }
           }
         ],
         address: [
@@ -291,6 +300,15 @@ export default {
             required: true,
             message: "请输入人脸免费人数",
             trigger: "blur"
+          },
+          {
+            validator: (rule, value, callback, source, options) => {
+              let err = [];
+              if (value < 3) {
+                err = "人脸个数最少设置为3个";
+              }
+              callback(err)
+            }
           }
         ],
         accountCount: [
@@ -299,6 +317,15 @@ export default {
             required: true,
             message: "请输入免费加入社区账号个数",
             trigger: "blur"
+          },
+          {
+            validator: (rule, value, callback, source, options) => {
+              let err = [];
+              if (value < 3) {
+                err = "每户账号个数最少设置3个";
+              }
+              callback(err)
+            }
           }
         ],
         payType: [
@@ -339,6 +366,7 @@ export default {
     isShow: function(val, oldVal) {
       if (val) {
         this.info = {
+          plotPhone: null,
           address: null,
           areaName: null,
           area: null,
@@ -390,53 +418,9 @@ export default {
         number: this.number
       }).then(({ data, errorCode }) => {
         if (errorCode === 0) {
-          let {
-            longitude,
-            latitude,
-            address,
-            communityCanUse,
-            plotName,
-            province,
-            provinceName,
-            city,
-            cityName,
-            area,
-            areaName,
-            street,
-            streetName,
-            companyId,
-            parkId,
-            faceCount,
-            accountCount,
-            payType,
-            effectiveTime,
-            remark,
-            temporaryCount,
-            isIdentity
-          } = data;
-          this.info = data;
-          this.form.longitude = longitude;
-          this.form.latitude = latitude;
-          this.form.address = address;
-          this.form.communityCanUse = communityCanUse ? 1 : 0;
-          this.form.plotName = plotName;
-          this.form.province = province;
-          this.form.provinceName = provinceName;
-          this.form.city = city;
-          this.form.cityName = cityName;
-          this.form.area = area;
-          this.form.areaName = areaName;
-          this.form.street = street;
-          this.form.streetName = streetName;
-          this.form.companyId = companyId;
-          this.form.parkId = parkId;
-          this.form.faceCount = faceCount;
-          this.form.accountCount = accountCount;
-          this.form.payType = payType;
-          this.form.effectiveTime = effectiveTime;
-          this.form.temporaryCount = temporaryCount;
-          this.form.remark = remark;
-          this.form.isIdentity = isIdentity
+          this.form = data
+          let {payType, effectiveTime, communityCanUse} = this.form
+          this.form.communityCanUse = communityCanUse ? 1 : 0
           if ((payType === 0 || payType === 1) && effectiveTime) {
             this.effectiveTime = this.$moment(effectiveTime * 1000).format(
               "YYYY-MM-DD HH:mm"
@@ -474,57 +458,8 @@ export default {
     submit() {
       this.$refs["form"].validate(async valid => {
         if (valid) {
-          let { id } = this.info;
-          let {
-            companyId,
-            province,
-            area,
-            city,
-            street,
-            provinceName,
-            areaName,
-            cityName,
-            streetName,
-            address,
-            plotName,
-            longitude,
-            latitude,
-            communityCanUse,
-            parkId,
-            faceCount,
-            accountCount,
-            payType,
-            effectiveTime,
-            remark,
-            temporaryCount,
-            isIdentity
-          } = this.form;
           this.subIsShow = true;
-          updatePlot({
-            companyId,
-            id,
-            plotName,
-            province,
-            area,
-            city,
-            street,
-            provinceName,
-            areaName,
-            cityName,
-            streetName,
-            address,
-            longitude,
-            latitude,
-            communityCanUse,
-            parkId,
-            faceCount,
-            accountCount,
-            payType,
-            effectiveTime,
-            remark,
-            temporaryCount,
-            isIdentity
-          })
+          updatePlot(this.form)
             .then(({ errorCode }) => {
               if (errorCode === 0) {
                 this.$Message.success("修改成功");

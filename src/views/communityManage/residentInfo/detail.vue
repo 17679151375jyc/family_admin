@@ -72,35 +72,7 @@
         </div>
       </div>
 
-      <div class="row">
-        <div class="item">
-          <div class="label">
-            <i class="iconfont iconwenhao"></i>
-            <span>是否业主</span>
-          </div>
-          <div class="text">
-            <span
-              :class="[info.isOwner ? 'cell-info' : 'cell-error']"
-            >{{info.isOwner ? '业主' : '非业主'}}</span>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="item">
-          <div class="label">
-            <i class="iconfont iconyonghu"></i>
-            <span>邀请人</span>
-          </div>
-          <div class="text">{{info.inviterName}}</div>
-        </div>
-        <div class="item">
-          <div class="label">
-            <i class="iconfont iconshouji"></i>
-            <span>邀请人手机</span>
-          </div>
-          <div class="text">{{info.inviterName}}</div>
-        </div>
-      </div>
+      
 
       <div class="row">
         <div class="item">
@@ -127,6 +99,33 @@
             <span>详细地址</span>
           </div>
           <div class="text">{{info.address}}</div>
+        </div>
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconwenhao"></i>
+            <span>是否业主</span>
+          </div>
+          <div class="text">
+            <span
+              :class="[info.isOwner ? 'cell-info' : 'cell-error']"
+            >{{info.isOwner ? '业主' : '否'}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconyonghu"></i>
+            <span>邀请人</span>
+          </div>
+          <div class="text">{{info.inviterName}}</div>
+        </div>
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconshouji"></i>
+            <span>邀请人手机</span>
+          </div>
+          <div class="text">{{info.inviterPhone}}</div>
         </div>
       </div>
     </div>

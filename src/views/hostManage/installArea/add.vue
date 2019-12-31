@@ -18,11 +18,8 @@
           <Option v-for="item in AreaType" :key="item && item.code" :value="item.code">{{item.name}}</Option>
         </Select>
       </FormItem>
-      <FormItem prop="userPhone" label="用户手机">
+      <FormItem prop="userPhone" label="绑定账号ID">
         <Input v-model.trim="form.userPhone" placeholder="请输入用户手机" style="width: 250px;" />
-      </FormItem>
-      <FormItem prop="areaName" label="区域名称">
-        <Input v-model.trim="form.areaName" placeholder="请输入区域名称" style="width: 250px;" />
       </FormItem>
       <FormItem prop="street" label="省市区街道" v-if="isShow">
         <address-cascader
@@ -36,6 +33,18 @@
           @onChange="addressOnChange"
         ></address-cascader>
       </FormItem>
+      <FormItem prop="address" label="详细地址">
+        <Input v-model.trim="form.address" placeholder="请填写详细地址，不超过32个字符" style="width: 250px;" />
+      </FormItem>
+      <FormItem prop="longitude" label="详细坐标">
+        <Tag
+          :color="form.longitude ? 'success' : 'default'"
+        >{{`[${form.longitude ? form.longitude : '未选择'}, ${form.latitude ? form.latitude : '未选择'}]`}}</Tag>
+        <Button type="info" size="small" @click="showAmap">地图选择</Button>
+      </FormItem>
+      <FormItem prop="areaName" label="区域名称">
+        <Input v-model.trim="form.areaName" placeholder="请输入区域名称" style="width: 250px;" />
+      </FormItem>
       <!-- <FormItem prop="doorNumber" label="对应小区" v-if="form.street">
         <plot-cascader
           style="width: 250px;"
@@ -47,17 +56,8 @@
           @onChange="plotOnChange"
         ></plot-cascader>
       </FormItem>-->
-      <FormItem prop="address" label="详细地址">
-        <Input v-model.trim="form.address" placeholder="请填写详细地址，不超过32个字符" style="width: 250px;" />
-      </FormItem>
-      <FormItem prop="longitude" label="详细坐标">
-        <Tag
-          :color="form.longitude ? 'success' : 'default'"
-        >{{`[${form.longitude ? form.longitude : '未选择'}, ${form.latitude ? form.latitude : '未选择'}]`}}</Tag>
-        <Button type="info" size="small" @click="showAmap">地图选择</Button>
-      </FormItem>
 
-      <FormItem prop="effectiveTime" label="服务结束时间">
+      <FormItem prop="effectiveTime" label="服务结束时间" v-if="form.type == 0 || form.type==1">
         <DatePicker
           v-model.trim="form.effectiveTime"
           :options="effectiveTimeOptions"
@@ -135,7 +135,9 @@ export default {
         effectiveTime: null,
         plotNumber: null,
         buildingNumber: null,
+        buildingName: null,
         doorNumber: null,
+        doorName: null,
         longitude: null, //经度
         latitude: null // 纬度
       },
@@ -242,6 +244,34 @@ export default {
   watch: {
     isShow: function(val, oldVal) {
       this.$refs["form"].resetFields();
+    },
+    "form.buildingName": {
+      handler: function(val) {
+        if (this.form.buildingName && this.form.buildingName != "暂不选择") {
+          this.form.areaName =
+            this.form.buildingName +
+            (this.form.doorName && this.form.doorName !== "暂不选择"
+              ? this.form.doorName
+              : "");
+        } else {
+          this.form.areaName = "";
+        }
+      },
+      immediate: true
+    },
+    "form.doorName": {
+      handler: function(val) {
+        if (this.form.buildingName && this.form.buildingName != "暂不选择") {
+          this.form.areaName =
+            this.form.buildingName +
+            (this.form.doorName && this.form.doorName !== "暂不选择"
+              ? this.form.doorName
+              : "");
+        } else {
+          this.form.areaName = "";
+        }
+      },
+      immediate: true
     }
   },
   methods: {
@@ -291,13 +321,16 @@ export default {
             buildingNumber,
             doorNumber,
             address,
-            effectiveTime: new Date(effectiveTime).getTime() / 1000
+            effectiveTime: effectiveTime
+              ? new Date(effectiveTime).getTime() / 1000
+              : ""
           })
             .then(({ errorCode }) => {
               if (errorCode === 0) {
                 this.$Message.success("添加成功");
                 this.subIsShow = false;
                 this.$emit("handleClose", true);
+                this.openHostManage()
               }
             })
             .catch(err => {
@@ -348,7 +381,8 @@ export default {
       this.$set(this.form, "longitude", position[0]);
       this.$set(this.form, "latitude", position[1]);
       this.amapClose();
-    }
+    },
+    
   }
 };
 </script>

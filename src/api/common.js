@@ -66,13 +66,6 @@ export const getAuthorization = (data) => { // 获取cos上传相关验证参数
     })
 }
 
-export const getAllText = (data) => { // 获取数据注释
-    return axios.request({
-        url: 'back/common/getSystemInitList',
-        data,
-        method: 'post'
-    })
-}
 
 export const getStatusList = (data) => { // 获取系统各种状态列表
     return axios.request({

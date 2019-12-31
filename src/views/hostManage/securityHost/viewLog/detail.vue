@@ -33,7 +33,6 @@
 </template>
 <script>
 import { preventionHost } from "@/api/hostManage";
-import { getAllText } from "@/api/common";
 export default {
   props: {
     id: {
@@ -51,7 +50,6 @@ export default {
   },
   data() {
     return {
-      operationType:{},
       list: [],
       tabLoading:false,
       page: {
@@ -138,9 +136,6 @@ export default {
   },
   methods: {
     getDetail() {
-      getAllText().then((data)=>{
-        this.operationType = data.data.MachineOperateType ? data.data.MachineOperateType:{};
-      })
       // 获取日志详情
       let { size, current } = this.page;
       let data = {

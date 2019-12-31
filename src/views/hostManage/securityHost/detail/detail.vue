@@ -5,16 +5,16 @@
     v-model.trim="visible"
     :mask-closable="false"
     :loading="loading"
-    width="900"
+    width="1000"
     footer-hide
   >
-    <detail-info :macNumber="macNumber"></Detail-info>
-
+    <DetailInfo v-if="visible" :macNumber="macNumber"></DetailInfo>
   </Modal>
 </template>
 <script>
-import DetailInfo from './detailInfo'
+import DetailInfo from "./detailInfo";
 export default {
+  name: "Detail",
   components: {
     DetailInfo
   },
@@ -35,7 +35,7 @@ export default {
 
   data() {
     return {
-      visible: false,
+      visible: false
     };
   },
   computed: {},
@@ -47,12 +47,9 @@ export default {
       this.$emit("input", val);
     }
   },
-  methods: {
-  }
+  methods: {}
 };
 </script>
-<style lang="stylus" scoped>
-
-</style>
+<style lang="stylus" scoped></style>
 
 

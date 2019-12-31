@@ -240,3 +240,47 @@ export const delNoticeType = (data) => { // 删除通知分类
         method: 'post'
     })
 }
+
+//商家管理
+export const getBusinessList = (data) => { // 商家列表
+    return axios.request({
+        url: 'back/business/getPageInfo',
+        data,
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8',
+        }
+    })
+}
+
+export const addBusiness = (data) => { // 添加商家
+    return axios.request({
+        url: 'back/business/add',
+        data,
+        method: 'post'
+    })
+}
+
+export const getBusinessDetail = (data) => { // 商家详情
+    return axios.request({
+        url: 'back/business/getById',
+        data,
+        method: 'post'
+    })
+}
+
+export const updateBusiness = (data) => { // 更新商家
+    return axios.request({
+        url: 'back/business/update',
+        data,
+        method: 'post'
+    })
+}
+
+export const delBusiness = (data) => { // 删除商家
+    return axios.request({
+        url: 'back/business/deleteBusiness',
+        data,
+        method: 'post'
+    })
+}

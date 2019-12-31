@@ -3,7 +3,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="66">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="66">
           <FormItem prop="plotNumber" label="小区楼座" v-if="!curPlotNumber">
             <div style="display: flex;">
               <address-cascader
@@ -45,7 +45,7 @@
             </Select>
           </FormItem>
           <FormItem label="出入类型">
-            <Select v-model.trim="searchForm.recordType" placeholder="输入出入类型" style="width: 120px;">
+            <Select v-model.trim="searchForm.recordType" placeholder="选择出入类型" style="width: 120px;">
               <Option
                 v-for="(item, key) in recordType"
                 :value="item.code"
@@ -54,7 +54,7 @@
             </Select>
           </FormItem>
           <FormItem label="是否开门">
-            <Select v-model.trim="searchForm.openStatus" placeholder="输入出入类型" style="width: 120px;">
+            <Select v-model.trim="searchForm.openStatus" placeholder="选择是否开门" style="width: 120px;">
               <Option
                 v-for="(item, key) in openStatus"
                 :value="item.code"
@@ -63,18 +63,18 @@
             </Select>
           </FormItem>
           <FormItem label="记录类型">
-            <Select v-model.trim="searchForm.openType" placeholder="输入出入类型" style="width: 120px;">
+            <Select v-model.trim="searchForm.openType" placeholder="选择记录类型" style="width: 120px;">
               <Option v-for="(item, key) in openType" :value="item.code" :key="key">{{ item.name}}</Option>
             </Select>
           </FormItem>
           <FormItem label="业主姓名">
-            <Input v-model.trim="searchForm.realName" placeholder="输入出入人姓名" style="width:120px;" />
+            <Input v-model.trim="searchForm.realName" placeholder="输入业主姓名" style="width:120px;" />
           </FormItem>
           <FormItem label="业主电话">
-            <Input v-model.trim="searchForm.phone" placeholder="输入出入人姓名" style="width:120px;" />
+            <Input v-model.trim="searchForm.phone" placeholder="输入业主电话" style="width:120px;" />
           </FormItem>
           <FormItem label="业主户号">
-            <Input v-model.trim="searchForm.doorName" placeholder="输入出入人姓名" style="width:120px;" />
+            <Input v-model.trim="searchForm.doorName" placeholder="输入业主户号" style="width:120px;" />
           </FormItem>
         </Form>
         <ButtonGroup class="btns">
@@ -98,7 +98,7 @@
 
     <!-- 分页-start -->
     <Page 
- placement="top"
+      placement="top"
       :total="page.total"
       :page-size="page.size"
       :page-size-opts="page.sizeOpts"
@@ -218,7 +218,7 @@ export default {
         {
           title: "楼座",
           key: "buildingName",
-          width: 50
+          width: 100
         },
         {
           title: "业主户号",
@@ -228,7 +228,7 @@ export default {
         {
           title: "位置",
           key: "positionName",
-          width: 100
+          minWidth: 100
         },
         {
           title: "是否开门",
@@ -262,6 +262,7 @@ export default {
         },        
         {
           title: "角色",
+          width: 80,
           key: "roleType",
           render: (h, params) => {
             return h(

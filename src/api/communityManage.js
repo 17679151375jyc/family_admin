@@ -251,6 +251,22 @@ export const residentRemoveOwner = (data) => { // 取消业主
     })
 }
 
+export const updateResident = (data) => { // 编辑住户信息
+    return axios.request({
+        url: 'back/domicile/updateDomicile',
+        data,
+        method: 'post'
+    })
+}
+
+export const delResident = (data) => { // 删除用户
+    return axios.request({
+        url: 'back/domicile/deleteDomicile',
+        data,
+        method: 'post'
+    })
+}
+
 export const communityDataStatistics = (data) => { // 统计社区用户数据
     return axios.request({
         url: 'back/sqPlot/checkNumber',
@@ -289,6 +305,13 @@ export const UpdateAdvertisementList = (data) => { // 更新门口机广告
         method: 'post'
     })
 }
+export const getAdvertisementJournal = (data) => { // 查看门口机日志
+    return axios.request({
+        url: 'back/deviceLog/getLogByAccount',
+        data,
+        method: 'post'
+    })
+}
 export const getAdvertisementDetail = (data) => { // 获取广告详情
     return axios.request({
         url: 'back/advertisement/getById',
@@ -318,6 +341,20 @@ export const addDoorCard = (data) => { // 添加门卡
     })
 }
 
+export const bindCard = (data) => { // 门卡绑定用户
+    return axios.request({
+        url: 'back/card/resetCard',
+        data,
+        method: 'post'
+    })
+}
+export const unbindCard = (data) => { // 门卡解绑
+    return axios.request({
+        url: 'back/card/modifyCard',
+        data,
+        method: 'post'
+    })
+}
 export const updateDoorCard = (data) => { // 编辑门卡
     return axios.request({
         url: 'back/card/updateCard',
@@ -330,6 +367,14 @@ export const updateDoorCard = (data) => { // 编辑门卡
 export const getCarList = (data) => { //获取车辆列表
     return axios.request({
         url: 'back/userCar/getPageInfo',
+        data,
+        method: 'post'
+    })
+}
+
+export const addCar = (data) => { //添加车辆
+    return axios.request({
+        url: 'back/userCar/addCar',
         data,
         method: 'post'
     })

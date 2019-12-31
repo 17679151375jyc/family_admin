@@ -14,11 +14,7 @@
       <FormItem prop="name" label="主机名称">
         <Input v-model.trim="form.name" placeholder="请填写主机名称" style="width: 200px;" />
       </FormItem>
-      <FormItem v-if="form.type !== 1" prop="account" label="主机登录号">
-        <Input v-model.trim="form.account" placeholder="请填写主机上的设备号" style="width: 200px;" />
-      </FormItem>
-
-      <FormItem v-if="form.type !== 1" prop="installCode" label="主机区域码" :required="true">
+       <FormItem v-if="form.type !== 1" prop="installCode" label="主机区域码" :required="true">
         <Select v-model="form.installCode" style="width:200px">
           <Option
             v-for="(item,index) in serverList"
@@ -27,6 +23,11 @@
           >{{ item.installCode }}</Option>
         </Select>
       </FormItem>
+      <FormItem v-if="form.type !== 1" prop="account" label="主机登录号">
+        <Input v-model.trim="form.account" placeholder="主机唯一账号(视频主机机身码)" style="width: 200px;" />
+      </FormItem>
+
+     
 
       <FormItem prop="areaNumber" required label="绑定区域" v-if="form.type===1 && phone">
         <Select v-model.trim="form.areaNumber" placeholder="请选择所属区域" style="width: 200px;">
@@ -159,8 +160,21 @@ export default {
         account: [
           {
             required: true,
-            message: "请填写主机上的设备号",
+            message: "请填写主机登录号",
             trigger: "blur"
+          },
+          {
+            validator: (rule, value, callback, source, options) => {
+              let err = [];
+              if (
+                value &&
+                value.substr(0, 1) !=
+                  this.form.installCode.substr(this.form.installCode.length - 1, 1)
+              ) {
+                err = "主机登录号首位字符必须与主机区域码最后一位一致";
+              }
+              callback(err);
+            }
           }
         ],
         installCode: [

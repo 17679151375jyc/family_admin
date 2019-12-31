@@ -4,7 +4,14 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="80">
+        <Form
+          class="search-form"
+          @keyup.enter.native="search"
+          ref="search-form"
+          :model="searchForm"
+          inline
+          :label-width="70"
+        >
           <FormItem label="楼座门号">
             <address-cascader
               ref="addressCascader"
@@ -14,6 +21,15 @@
               :showLevel="5"
               style="width: 250px"
             ></address-cascader>
+          </FormItem>
+          <FormItem prop="input.type" label="广告分类">
+            <Select v-model="searchForm.input.type" style="width:120px;">
+              <Option
+                v-for="item in AdvertisementType"
+                :key="item.code"
+                :value="item.code"
+              >{{item.name}}</Option>
+            </Select>
           </FormItem>
           <FormItem prop="input.effective" label="是否有效">
             <Select v-model.trim="searchForm.input.effective" style="width:120px;">
@@ -34,12 +50,18 @@
         </ButtonGroup>
       </div>
       <div class="handle-wrapper">
-        <Button v-show="$options.filters.auth(['communityM.advertisingM.add'])" icon="md-add" type="info" @click="showAdd">添加</Button>
+        <Button
+          v-show="$options.filters.auth(['communityM.advertisingM.add'])"
+          icon="md-add"
+          type="info"
+          @click="showAdd"
+        >添加</Button>
       </div>
     </div>
     <!-- 顶部操作内容-end -->
-
-    <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="tabData"></Table>
+    <div class="win-table-wrapper" id="win-table-wrapper">
+      <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="list"></Table>
+    </div>
     <Page
       placement="top"
       :total="page.total"
@@ -56,14 +78,14 @@
     <!-- 权限树状表-end -->
 
     <!-- 详情-start -->
-    <detail @handleClose="detailClose" :isShow="detail.isShow" :id="detail.id"></detail>
+    <detail v-model="detail.isShow" :id="detail.id"></detail>
     <!-- 详情-end -->
     <!-- 添加内容弹窗-start -->
-    <add @handleClose="addClose" :isShow="add.isShow" :parentId="add.parentId" :code="add.code"></add>
+    <add v-model="add.isShow" :parentId="add.parentId" :code="add.code"></add>
     <!-- 添加内容弹窗-end -->
 
     <!-- 编辑内容弹窗-start -->
-    <edit @handleClose="editClose" :isShow="edit.isShow" :id="edit.id"></edit>
+    <edit v-model="edit.isShow" :id="edit.id"></edit>
     <!-- 编辑内容弹窗-end -->
   </div>
 </template>
@@ -86,14 +108,7 @@ export default {
   data() {
     return {
       arrdessPolt: [],
-      IsAsver: {
-        0: "有效",
-        1: "无效"
-      },
-      IsAll: {
-        0: "是",
-        1: "否"
-      },
+      AdvertisementType: this.$options.filters.statusList("AdvertisementType"),
       page: {
         total: 0,
         size: this.$config.page.size,
@@ -102,6 +117,7 @@ export default {
       },
       searchForm: {
         input: {
+          type: null,
           provinceCode: null,
           cityCode: null,
           areaCode: null,
@@ -143,11 +159,32 @@ export default {
           }
         },
         {
-          title: "广告图片",
+          title: "广告",
           key: "url",
           width: 88,
           align: "center",
-          render: (h, params) => {
+          render: (h, { row: { url, type } }) => {
+            let html = [];
+            if (type === 0) {
+              // 视频
+              html = h("i", {
+                class: {
+                  iconfont: true,
+                  iconiconfonttubiao_shipinzhibo: true
+                },
+                style: {
+                  "font-size": "40px",
+                  color: "#3388ff"
+                }
+              });
+            } else if (type === 1) {
+              // 图片
+              html = h("img", {
+                attrs: {
+                  src: url
+                }
+              });
+            }
             return h(
               "div",
               {
@@ -155,13 +192,7 @@ export default {
                   "flex-div": true
                 }
               },
-              [
-                h("img", {
-                  attrs: {
-                    src: this.list[params.index].url
-                  }
-                })
-              ]
+              [html]
             );
           }
         },
@@ -171,24 +202,126 @@ export default {
         //   width: 250
         // },
         {
+          title: "广告类型",
+          width: 100,
+          render: (h, { row: { type } }) => {
+            return h(
+              "div",
+              {
+                class: {
+                  "cell-primary": type === 0,
+                  "cell-success": type === 1
+                }
+              },
+              this.$options.filters.statusName(type, "AdvertisementType")
+            );
+          }
+        },
+        {
           title: "小区名称",
           key: "plotNames",
-          width: 300
+          width: 300,
+          render: (
+            h,
+            {
+              row: {
+                plotNumber,
+                provinceName,
+                cityName,
+                areaName,
+                streetName,
+                plotName
+              }
+            }
+          ) => {
+            return h(
+              "div",
+              {
+                class: {
+                  "cell-primary": !plotNumber
+                }
+              },
+              plotNumber
+                ? provinceName +
+                    cityName +
+                    areaName +
+                    streetName +
+                    "-" +
+                    plotName
+                : "全部小区"
+            );
+          }
         },
         {
           title: "广告是否有效",
           key: "effective",
-          minWidth: 80
+          minWidth: 80,
+          render: (h, { row: { effective } }) => {
+            return h(
+              "div",
+              {
+                class: {
+                  "cell-error": effective,
+                  "cell-success": !effective
+                }
+              },
+              effective ? "无效" : "有效"
+            );
+          }
         },
         {
           title: "轮播时间",
           key: "time",
-          minWidth: 120
+          minWidth: 120,
+          render: (h, { row: { time } }) => {
+            return h("div", time ? time + "秒" : "");
+          }
         },
         {
           title: "是否全局",
-          key: "globleStatus",
-          minWidth: 120
+          minWidth: 120,
+          render: (h, { row: { globleStatus } }) => {
+            return h(
+              "div",
+              {
+                class: {
+                  "cell-error": globleStatus,
+                  "cell-success": !globleStatus
+                }
+              },
+              globleStatus ? "否" : "是"
+            );
+          }
+        },
+        {
+          title: "有效时间",
+          minWidth: 150,
+          render: (h, { row: { effectiveTime } }) => {
+            let html = [
+              h(
+                "div",
+                this.$moment(effectiveTime * 1000).format("YYYY-MM-DD HH:mm:ss")
+              )
+            ];
+            if (effectiveTime * 1000 < new Date().getTime()) {
+              html.push(
+                h(
+                  "div",
+                  {},
+                  "已失效" + this.$moment(effectiveTime * 1000).toNow(true)
+                )
+              );
+            }
+            return h(
+              "div",
+              {
+                class: {
+                  "cell-error": effectiveTime * 1000 < new Date().getTime()
+                }
+              },
+              html
+            );
+          }
         },
         {
           title: "操作",
@@ -198,7 +331,7 @@ export default {
           fixed: "right",
           render: (h, params) => {
             let btnGroup = [];
-            if (this.$options.filters.auth(['communityM.advertisingM.edit'])) {
+            if (this.$options.filters.auth(["communityM.advertisingM.edit"])) {
               let btn = h(
                 "Button",
                 {
@@ -219,7 +352,7 @@ export default {
               );
               btnGroup.push(btn);
             }
-            if (this.$options.filters.auth(['communityM.advertisingM.edit'])) {
+            if (this.$options.filters.auth(["communityM.advertisingM.edit"])) {
               let btn = h(
                 "Button",
                 {
@@ -241,7 +374,7 @@ export default {
               btnGroup.push(btn);
             }
 
-            if (this.$options.filters.auth(['communityM.advertisingM.del'])) {
+            if (this.$options.filters.auth(["communityM.advertisingM.del"])) {
               let btn = h(
                 "Poptip",
                 {
@@ -291,19 +424,33 @@ export default {
           cityName,
           areaName,
           streetName,
-          plotName
+          plotName,
+          effectiveTime
         } = this.list[i];
         tabData.push({
           plotNumber: plotNumber ? plotNumber : "全部小区",
-          effective: effective >= 0 ? this.IsAsver[effective] : "",
+          effective,
           time: time ? time + "秒" : null,
-          globleStatus: globleStatus >= 0 ? this.IsAll[globleStatus] : "",
+          globleStatus,
           plotNames: plotNumber
             ? provinceName + cityName + areaName + streetName + "-" + plotName
-            : "全部小区"
+            : "全部小区",
+          effectiveTime
         });
       }
       return tabData;
+    }
+  },
+  watch: {
+    "add.isShow"(val) {
+      if (!val) {
+        this.getList();
+      }
+    },
+    "edit.isShow"(val) {
+      if (!val) {
+        this.getList();
+      }
     }
   },
   mounted() {
@@ -390,32 +537,12 @@ export default {
       this.add.isShow = true;
     },
     /**
-     * @method addClose 添加的弹窗关闭时触发
-     * @param {Boolean} isRefresh 是否需要重新加载列表
-     */
-    addClose(isRefresh = false) {
-      this.add.isShow = false;
-      if (isRefresh) {
-        this.getList();
-      }
-    },
-    /**
      * @method showEdit 显示编辑弹窗
      * @param {Number} id 要编辑的数据的对应id
      */
     showEdit(id) {
       this.edit.id = id;
       this.edit.isShow = true;
-    },
-    /**
-     * @method editClose 编辑的弹窗关闭时触发
-     * @param {Boolean} isRefresh 是否需要重新加载列表
-     */
-    editClose(isRefresh = false) {
-      this.edit.isShow = false;
-      if (isRefresh) {
-        this.getList();
-      }
     },
     /**
      * @method traverseToTree 把数据转化为树状结构

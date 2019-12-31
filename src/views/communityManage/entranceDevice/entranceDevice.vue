@@ -3,7 +3,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="80">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="80">
           <FormItem prop="plotNumber" label="小区楼座" v-if="!curPlotNumber">
             <div style="display: flex;">
               <address-cascader
@@ -31,7 +31,7 @@
           <FormItem prop="positionDesc" label="位置">
             <Input v-model.trim="searchForm.positionDesc" placeholder="位置" style="width:120px;" />
           </FormItem>
-          <FormItem prop="deviceRoleType" label="出入类型" >
+          <FormItem prop="deviceRoleType" label="出入类型">
             <Select v-model="searchForm.deviceRoleType" style="width: 120px;">
               <Option v-for="item in RecordType" :value="item.code" :key="item.code">{{item.name}}</Option>
             </Select>
@@ -48,7 +48,12 @@
         </ButtonGroup>
       </div>
       <div class="handle-wrapper">
-        <Button icon="md-add" v-if="$options.filters.auth(['communityM.entranceDevice.add'])" type="info" @click="showAdd">添加</Button>
+        <Button
+          icon="md-add"
+          v-if="$options.filters.auth(['hostM.entranceDevice.add'])"
+          type="info"
+          @click="showAdd"
+        >添加</Button>
       </div>
     </div>
     <!-- 顶部操作内容-end -->
@@ -84,7 +89,7 @@
     <!-- 编辑内容弹窗-end -->
 
     <!-- 详情内容弹窗-start -->
-    <detail @handleClose="detailClose" :isShow="detail.isShow" :id="detail.id"></detail>
+    <detail @handleClose="detailClose" :isShow="detail.isShow" :deviceAccount="detail.deviceAccount"></detail>
     <!-- 详情内容弹窗-end -->
   </div>
 </template>
@@ -95,7 +100,8 @@ import Detail from "./detail";
 import {
   getEntranceDevice,
   unbindEntranceDevice,
-  updateEntranceDevice
+  updateEntranceDevice,
+  delEntranceDevice
 } from "@/api/communityManage";
 import { mapState } from "vuex";
 import AddressCascader from "@/components/addressCascader/addressCascader";
@@ -130,7 +136,7 @@ export default {
       },
       detail: {
         isShow: false,
-        id: null
+        deviceAccount: null
       },
       tabIsLoading: false,
       page: {
@@ -279,7 +285,9 @@ export default {
           fixed: "right",
           render: (h, params) => {
             let btnGroup = [];
-            if (this.$options.filters.auth(['communityM.entranceDevice.edit'])) {
+            if (
+              this.$options.filters.auth(["hostM.entranceDevice.edit"])
+            ) {
               let btn = h(
                 "Button",
                 {
@@ -296,11 +304,36 @@ export default {
                     }
                   }
                 },
-                params.row.provinceCode ? '编辑' :'绑定'
+                params.row.plotNumber ? "编辑" : "绑定"
               );
               btnGroup.push(btn);
             }
-            if (this.$options.filters.auth(['communityM.entranceDevice.edit'])) {
+            if (
+              this.$options.filters.auth(['hostM.entranceDevice.log'])
+            ) {
+              let btn = h(
+                "Button",
+                {
+                  props: {
+                    type: "success",
+                    size: "small"
+                  },
+                  style: {
+                    margin: "2px"
+                  },
+                  on: {
+                    click: () => {
+                      this.showDetail(params.index);
+                    }
+                  }
+                },
+                "查看日志"
+              );
+              btnGroup.push(btn);
+            }
+            if (
+              this.$options.filters.auth(["hostM.entranceDevice.edit"])
+            ) {
               let items = [];
               for (let i = 0; i < this.DeviceActionType.length; i++) {
                 let { name, code } = this.DeviceActionType[i];
@@ -395,7 +428,12 @@ export default {
               );
               btnGroup.push(dropDown);
             }
-            if (this.$options.filters.auth(['communityM.entranceDevice.unbind']) && params.row.provinceCode) {
+            if (
+              this.$options.filters.auth([
+                "hostM.entranceDevice.unbind"
+              ]) &&
+              params.row.provinceCode
+            ) {
               let btn = h(
                 "Poptip",
                 {
@@ -423,6 +461,42 @@ export default {
                       }
                     },
                     "解绑"
+                  )
+                ]
+              );
+              btnGroup.push(btn);
+            }
+            if (
+              this.$options.filters.auth(["hostM.entranceDevice.del"]) &&
+              !params.row.plotNumber
+            ) {
+              let btn = h(
+                "Poptip",
+                {
+                  props: {
+                    confirm: true,
+                    title: "你确定要删除吗?",
+                    transfer: true
+                  },
+                  style: {
+                    margin: "0 2px"
+                  },
+                  on: {
+                    "on-ok": () => {
+                      this.delItem(params.row.deviceNumber);
+                    }
+                  }
+                },
+                [
+                  h(
+                    "Button",
+                    {
+                      props: {
+                        type: "error",
+                        size: "small"
+                      }
+                    },
+                    "删除"
                   )
                 ]
               );
@@ -554,9 +628,9 @@ export default {
     },
     showDetail(index) {
       // 显示详情弹窗
-      let { id } = this.list[index];
-      console.log("id", id);
-      this.detail.id = id;
+      let { deviceAccount } = this.list[index];
+      console.log(deviceAccount)
+      this.detail.deviceAccount = deviceAccount;
       this.detail.isShow = true;
     },
     detailClose() {
@@ -594,6 +668,19 @@ export default {
       }).then(({ data, errorCode }) => {
         if (errorCode === 0) {
           this.$Message.success("操作成功");
+        }
+      });
+    },
+    /**
+     * 删除数据
+     */
+    delItem(deviceNumber) {
+      delEntranceDevice({
+        deviceNumber
+      }).then(({ errorCode }) => {
+        if (errorCode === 0) {
+          this.$Message.success("删除成功");
+          this.getList();
         }
       });
     }

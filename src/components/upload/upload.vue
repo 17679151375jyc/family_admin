@@ -2,10 +2,11 @@
   <div class="upload">
     <i class="iconfont iconjia"></i>
     <span>上 传</span>
-    <div class="img-div" v-if="value">
-      <img :src="filePath" alt />
+    <div class="img-div" v-if="filePath">
+      <img :src="filePath" v-if="type==='image'" />
+      <i v-if="type==='video'" class="iconfont iconiconfonttubiao_shipinzhibo"></i>
     </div>
-    <div class="close" @click="filePath=''" v-if="value && !loading">
+    <div class="close" @click="filePath=''" v-if="filePath && !loading">
       <i class="iconfont iconguanbi1"></i>
     </div>
     <div class="loading" v-show="loading">
@@ -14,12 +15,7 @@
         <div>上传中...</div>
       </Spin>
     </div>
-    <input
-      type="file"
-      ref="fileInput"
-      @change="fileChange($event)"
-      accept="image/png, image/jpeg, image/gif, image/jpg"
-    />
+    <input type="file" ref="fileInput" @change="fileChange($event)" :accept="accept" />
   </div>
 </template>
 <script>
@@ -57,6 +53,10 @@ export default {
       // 文件名前缀
       type: String,
       default: ""
+    },
+    type: {
+      type: String,
+      default: "image"
     }
   },
   watch: {
@@ -73,18 +73,42 @@ export default {
       filePath: ""
     };
   },
+  computed: {
+    accept() {
+      if (this.type === "image") {
+        return "image/png, image/jpeg, image/gif, image/jpg";
+      } else if (this.type === "video") {
+        return "video/mp4";
+      } else {
+          return ''
+      }
+    }
+  },
   methods: {
     /**
      * 图片上传
      */
     fileChange(e) {
       let file = e.target.files[0];
-      if (file.type.split("/")[0] !== "image") {
-        this.$Message.error("请选择正确的图片类型上传");
+
+      if (file.type.split("/")[0] !== this.type) {
+        this.$Message.error("请选择对应的文件类型上传");
         return;
       }
+      if (this.type === "video") {
+        if (file.size > 52428800) {
+          // 视频上传不能大于50m
+          this.$Message.error("上传的视频不能大于50M");
+          return;
+        }
+      } else if (this.type === "image") {
+        // 图片上传不能大于5m
+        if (file.size > 5242880) {
+          this.$Message.error("上传的视频不能大于5M");
+          return;
+        }
+      }
       this.loading = true;
-      console.log("开始上传");
       cos.sliceUploadFile(
         {
           Bucket: this.$config.cos.bucket,
@@ -158,6 +182,11 @@ export default {
     img {
       max-height: 100%;
       max-width: 100%;
+    }
+
+    i {
+      color: #3388ff;
+      font-size: 48px;
     }
   }
 

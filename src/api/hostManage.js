@@ -254,13 +254,13 @@ export const getHostNetworkDetail = (data) => { // 获取配网详情
     })
 }
 
-// export const updateHostNetwork = (data) => { // 更新配网配置
-//         return axios.request({
-//             url: 'back/sqMachineInstall/update',
-//             data,
-//             method: 'post'
-//         })
-//     }
+export const updateHostNetwork = (data) => { // 更新配网配置
+    return axios.request({
+        url: 'back/sqMachineInstall/update',
+        data,
+        method: 'post'
+    })
+}
 export const delHostNetworkDetail = (data) => { // 删除主机配网
         return axios.request({
             url: 'back/sqMachineInstall/deleteById',

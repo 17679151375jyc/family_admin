@@ -37,9 +37,9 @@ export default {
         });
         this.marker = new AMap.Marker({
           position: this.map.getCenter(),
-          icon:
-            "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
-          offset: new AMap.Pixel(-13, -30)
+        //   icon:
+        //     "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
+        //   offset: new AMap.Pixel(-13, -30)
         });
         this.marker.setMap(this.map);
       }

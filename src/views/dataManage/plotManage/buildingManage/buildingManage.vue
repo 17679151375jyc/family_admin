@@ -1,7 +1,7 @@
 <template>
   <div>
     <Modal
-      title="楼座管理"
+      title="小区管理"
       v-model.trim="isShow"
       :mask-closable="false"
       :loading="loading"
@@ -59,7 +59,12 @@
   </div>
 </template>
 <script>
-import { getBuildingList, delBuilding, delDoor } from "@/api/dataManage";
+import {
+  getBuildingList,
+  delBuilding,
+  delDoor,
+  addBuilding
+} from "@/api/dataManage";
 import AddressCascader from "@/components/addressCascader/addressCascader";
 import AddBuilding from "./addBuilding";
 import EditBuilding from "./editBuilding";
@@ -214,7 +219,9 @@ export default {
           expand: true,
           render: (h, { root, node, data }) => {
             let addBuilding;
-            if (this.$options.filters.auth(['common.plogM.buildingM.addBuilding'])) {
+            if (
+              this.$options.filters.auth(["common.plogM.buildingM.addBuilding"])
+            ) {
               addBuilding = h(
                 "span",
                 {
@@ -225,6 +232,24 @@ export default {
                   }
                 },
                 [
+                  h(
+                    "Button",
+                    {
+                      props: Object.assign({}, this.buttonProps, {
+                        icon: "ios-add",
+                        type: "info"
+                      }),
+                      style: {
+                        marginRight: "2px"
+                      },
+                      on: {
+                        click: () => {
+                          this.addPlotDoor();
+                        }
+                      }
+                    },
+                    "添加小区门口"
+                  ),
                   h(
                     "Button",
                     {
@@ -305,6 +330,9 @@ export default {
       })
         .then(({ data, errorCode }) => {
           if (errorCode === 0) {
+            // for(let i=0; i<data.length; i++){
+            //   data[i].children = data[i].children.reverse()
+            // }
             this.buildingList = data;
             for (let i = 0; i < this.buildingList.length; i++) {
               //   this.buildingList[i].expand = true
@@ -333,7 +361,7 @@ export default {
             marginLeft: "5px"
           }
         });
-        if (this.$options.filters.auth(['common.plogM.buildingM.addDoor'])) {
+        if (this.$options.filters.auth(["common.plogM.buildingM.addDoor"])) {
           console.log("data", data);
           importBtn = [
             h(
@@ -409,7 +437,9 @@ export default {
             )
           ];
         }
-        if (this.$options.filters.auth(['common.plogM.buildingM.editBuilding'])) {
+        if (
+          this.$options.filters.auth(["common.plogM.buildingM.editBuilding"])
+        ) {
           editBtn = [
             h(
               "Button",
@@ -468,7 +498,7 @@ export default {
           ];
         }
       } else {
-        if (this.$options.filters.auth(['common.plogM.buildingM.editDoor'])) {
+        if (this.$options.filters.auth(["common.plogM.buildingM.editDoor"])) {
           // 如果有编辑门号权限
           editDoorBtn = [
             h(
@@ -491,7 +521,7 @@ export default {
             )
           ];
         }
-        if (this.$options.filters.auth(['common.plogM.buildingM.delDoor'])) {
+        if (this.$options.filters.auth(["common.plogM.buildingM.delDoor"])) {
           delDoorBtn = [
             h(
               "Poptip",
@@ -542,7 +572,7 @@ export default {
           style: {
             display: "inline-block",
             width: "100%",
-            paddingRight: '12px'
+            paddingRight: "12px"
           }
         },
         [
@@ -867,6 +897,20 @@ export default {
         this.tableLoading = false;
         this.showRemoveFile = true;
       };
+    },
+    /**
+     * 一键添加一个叫门口的楼座
+     */
+    addPlotDoor() {
+      addBuilding({
+        plotNumber: this.plotNumber,
+        buildingName: '门口'
+      }).then(({ data, errorCode }) => {
+        if (errorCode === 0) {
+          this.$Message.success("添加成功");
+          this.getList();
+        }
+      });
     }
   }
 };

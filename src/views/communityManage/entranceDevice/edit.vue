@@ -3,7 +3,7 @@
     <Modal
       title="编辑"
       v-model.trim="isShow"
-      width="500"
+      width="540"
       :mask-closable="false"
       :loading="loading"
       :closable="false"
@@ -70,7 +70,7 @@
         <FormItem prop="positionDesc" label="设备位置">
           <Input v-model.trim="form.positionDesc" placeholder="请输入设备位置描述" style="width:200px;" />
         </FormItem>
-        <FormItem prop="files.path" label="logo图片">
+        <FormItem label="logo图片">
           <upload v-model="form.files.path" fileNamePrefix="entranceDevice"></upload>
         </FormItem>
       </Form>
@@ -126,7 +126,6 @@ export default {
         area: null,
         street: null
       },
-      info: {},
       form: {
         deviceNumber: null,
         positionDesc: null, // 设备位置描述
@@ -376,24 +375,17 @@ export default {
             doorName,
             doorNumber,
             longitude,
-            latitude
+            latitude,
+            deviceAccount
           } = this.form;
           this.subIsShow = true;
           updateEntranceDevice({
             deviceType,
             deviceNumber,
             deviceName,
-            logoUrl: this.form.files.path,
+            logoUrl: files.path,
             positionDesc,
             deviceRoleType,
-            provinceName,
-            provinceCode,
-            cityName,
-            cityCode,
-            areaName,
-            areaCode,
-            streetName,
-            streetCode,
             provinceName,
             provinceCode,
             cityName,
@@ -409,7 +401,8 @@ export default {
             doorName,
             doorNumber,
             longitude,
-            latitude
+            latitude,
+            deviceAccount
           })
             .then(({ errorCode }) => {
               if (errorCode === 0) {

@@ -4,23 +4,22 @@
     <!-- 表格-start -->
     <!-- <Table style="width:100%;" border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="tabData"></Table> -->
     <!-- 表格-end -->
-    <div class="list-items" style='position: relative;'>
-      <Spin size="large" style='position: absolute;left: 48%;top: 150px' v-if='tabIsLoading'></Spin>
+    <div class="list-items" style="position: relative;">
+      <Spin size="large" style="position: absolute;left: 48%;top: 150px" v-if="tabIsLoading"></Spin>
       <div class="item" v-for="(item, index) in list" :key="index">
         <div class="time">{{item.triggeringTime | formatTime}}</div>
         <div class="info">
-          <div :class="['role', roleTypeList[item.roleType].bgClass]" v-if="item.roleType!=null">
-            <span :class="[roleTypeList[item.roleType].class]">{{roleTypeList[item.roleType].name}}</span>
+          <div :class="['role']" v-if="item.roleType!=null">
+            <span>{{item.roleType |statusName("RelationType")}}</span>
           </div>
           <div class="name">{{item.roleName || '暂无'}}</div>
           <div
             class="address"
-          >{{`${item.buildingName||''}${item.positionName ? ' - '+item.positionName : ''} `}}
-          </div>
+          >{{`${item.buildingName||''}${item.positionName ? ' - '+item.positionName : ''} `}}</div>
         </div>
       </div>
       <div v-if="list.length===0" class="nodata_css">
-        <img src="@/assets/images/community/nodata_img.png">
+        <img src="@/assets/images/community/nodata_img.png" />
         <div>暂无数据</div>
       </div>
     </div>
@@ -105,8 +104,7 @@ export default {
       }
     };
   },
-  computed: {
-  },
+  computed: {},
   watch: {
     "searchForm.streetCode": function(val, oldVal) {
       if (val) {
@@ -129,7 +127,7 @@ export default {
      * @method getList 获取当前的数据列表
      */
     getList(searchData = this.searchForm) {
-      this.list = []; 
+      this.list = [];
       this.tabIsLoading = true;
       let { size, current } = this.page;
       let data = {
@@ -361,15 +359,18 @@ export default {
     // }
   }
 }
-.nodata_css{
+
+.nodata_css {
   font-size: 16px;
 }
-.nodata_css img{
+
+.nodata_css img {
   width: 50px;
   height: 44px;
   margin-top: 40px;
 }
-.nodata_css div{  
+
+.nodata_css div {
   color: #7D92B3;
   margin-top: 10px;
 }

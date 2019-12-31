@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper" :style="{'background': '#F2F3F5'}">
+  <div class="wrapper" :style="{'background': '#F2F3F5'}" v-if="homeIsVisible">
     <!-- 顶部内容-start -->
     <header-bar
       :tagsNavList="tagsNavList"
@@ -271,6 +271,7 @@ export default {
   },
   data() {
     return {
+      homeIsVisible: false,
       dataTotal: {
         total: 0,
         chingNumber: 0,
@@ -405,10 +406,14 @@ export default {
       ]
     };
   },
-  created() {
+  async created() {
     this.handleLoginByToken();
     this.communityDataStatistics();
-    this.handleGetStatusList(); // 获取系统状态列表
+    await this.handleGetStatusList(); // 获取系统状态列表
+     setTimeout(() => {
+        this.homeIsVisible = true;
+    },100)
+    
   },
   mounted() {},
   methods: {
@@ -539,27 +544,6 @@ export default {
   bottom: 0;
   right: 0;
   left: 0;
-
-  /* 定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸 */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-    background-color: #F5F5F5;
-  }
-
-  /* 定义滚动条轨道 内阴影+圆角 */
-  ::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    // border-radius: 10px;
-    background-color: #FFF;
-  }
-
-  /* 定义滑块 内阴影+圆角 */
-  ::-webkit-scrollbar-thumb {
-    // border-radius: 10px;
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    background-color: #aaa;
-  }
 }
 
 .wrapper {

@@ -1,6 +1,6 @@
 <template>
   <Modal
-    title="编辑"
+    title="绑定业务单"
     v-model.trim="isShow"
     :mask-closable="false"
     :loading="loading"
@@ -68,7 +68,7 @@ export default {
   },
   watch: {
     isShow: function(val, oldVal) {
-      // this.$refs["form"].resetFields();
+      this.$refs["form"].resetFields();
       if(val){
         this.getDetail()
         this.form.areaNumber = this.areaNumber;
@@ -83,7 +83,10 @@ export default {
       }).then(({errorCode, data})=>{
         if(errorCode === 0){
           if(data){
+            console.log(data)
             this.businessList = data;
+          }else{
+            this.businessList = [];
           }
         }
       })

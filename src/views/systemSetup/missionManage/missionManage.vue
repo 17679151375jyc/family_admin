@@ -4,7 +4,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" :model="searchForm" ref="search-form" inline :label-width="60">
+        <Form class="search-form" @keyup.enter.native="search" :model="searchForm" ref="search-form" inline :label-width="60">
           <!-- <FormItem label="手机号" prop="phone">
             <Input v-model.trim="searchForm.phone" placeholder="输入手机号" style="width:120px;" />
           </FormItem> -->

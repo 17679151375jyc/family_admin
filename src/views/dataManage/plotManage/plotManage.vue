@@ -3,7 +3,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container" v-if="companyType!==1">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="80">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="80">
           <FormItem label="小区名称" prop="plotName">
             <Input v-model.trim="searchForm.plotName" placeholder="输入小区名称" style="width:120px;" />
           </FormItem>
@@ -166,6 +166,11 @@ export default {
           width: 150
         },
         {
+          title: "联系手机",
+          key: "plotPhone",
+          width: 150
+        },
+        {
           title: "详细地址",
           key: "address",
           minWidth: 150
@@ -219,7 +224,7 @@ export default {
                     }
                   }
                 },
-                "楼座管理"
+                "小区管理"
               );
               btnGroup.push(btn);
             }
@@ -244,7 +249,7 @@ export default {
               );
               btnGroup.push(btn);
             }
-            if (true) {
+            if (this.$options.filters.auth(['common.plogM.del'])) {
               let btn = h(
                 "Poptip",
                 {
@@ -292,7 +297,8 @@ export default {
           address,
           latitude,
           longitude,
-          communityCanUse
+          communityCanUse,
+          plotPhone,
         } = this.list[i];
         tabData.push({
           companyName,
@@ -302,6 +308,7 @@ export default {
           areaName,
           streetName,
           address,
+          plotPhone,
           coordinates: [longitude, latitude],
           communityCanUse: communityCanUse
             ? "用于社区和安装区域"

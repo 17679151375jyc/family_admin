@@ -32,7 +32,7 @@
           <Option v-for="(item,index) in roleList" :key="index" :value="item.id">{{item.roleName}}</Option>
         </Select>
       </FormItem>
-      <FormItem prop="machineInstallCode" label="主机区域">
+      <FormItem prop="machineInstallCode" label="主机区域" v-if='!curPlotNumber'>
         <Select
           placeholder="客服角色请选择"
           multiple

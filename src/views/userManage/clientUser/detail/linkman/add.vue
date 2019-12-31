@@ -31,7 +31,7 @@
 
     <div slot="footer">
       <Button type="text" @click="handleClose">取消</Button>
-      <Button type="primary" @click="submit" :loading="subIsShow">确定</Button>
+      <Button type="primary" @click="submit" :loading="subIsLoading">确定</Button>
     </div>
   </Modal>
 </template>
@@ -62,7 +62,7 @@ export default {
   },
   data() {
     return {
-      subIsShow: false,
+      subIsLoading: false,
       form: {
         name: null,
         sex: null,
@@ -126,16 +126,19 @@ export default {
         if (valid) {
           this.form.userNumber = this.userNumber;
           console.log(this.form);
+          this.subIsLoading = true
           addContacts(this.form)
             .then(({ errorCode }) => {
               if (errorCode === 0) {
                 this.$Message.success("添加成功");
-                this.subIsShow = false;
                 this.$emit("handleClose", true);
+                setTimeout(() => {
+                  this.subIsLoading = false;
+                }, 200);
               }
             })
             .catch(err => {
-              this.subIsShow = false;
+              this.subIsLoading = false;
             });
         } else {
           this.$Message.error("提交信息有误");

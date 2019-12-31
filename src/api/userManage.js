@@ -16,9 +16,26 @@ export const addClientUser = (data) => { // 添加用户端用户
     })
 }
 
+export const resetPassWord = (data) => { // 重置密码
+    return axios.request({
+        url: 'back/comUser/resetPassword',
+        data,
+        method: 'post'
+    })
+}
+
+
 export const getClientUserDetail = (data) => { // 获取一条用户信息详情
     return axios.request({
         url: 'back/comUser/findComUserByUserNumber',
+        data,
+        method: 'post'
+    })
+}
+
+export const updateClientUser = (data) => {
+    return axios.request({
+        url: 'back/comUser/update',
         data,
         method: 'post'
     })
@@ -74,6 +91,14 @@ export const resetCaptain = (data) => { // 解绑并重选队长
 export const getFalimyInfo = (data) => { // 获取家人信息
     return axios.request({
         url: 'back/Face/getFamilyByUserNumber',
+        data,
+        method: 'post'
+    })
+}
+
+export const getFamilyInfo = (data) => { // 获取家人信息
+    return axios.request({
+        url: 'back/Face/getFamilyAllByUserNumber',
         data,
         method: 'post'
     })

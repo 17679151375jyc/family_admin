@@ -3,7 +3,12 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="40">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="40">
+          <FormItem prop="companyId" label="所属公司" :label-width="70">
+            <Select v-model.trim="searchForm.companyId" placeholder="请选择所属公司" style="width: 120px;">
+              <Option v-for="item in companyList" :value="item.id" :key="item.id">{{item.name}}</Option>
+            </Select>
+          </FormItem>
           <FormItem prop="plotNumber" label="小区" v-if="companyType!==1">
             <div style="display: flex;">
               <address-cascader
@@ -51,7 +56,7 @@
 
     <!-- 表格-start -->
     <div class="win-table-wrapper" id="win-table-wrapper">
-      <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="tabData"></Table>
+      <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="list"></Table>
     </div>
     <!-- 表格-end -->
 
@@ -115,6 +120,7 @@ import Detail from "./detail";
 import Check from "./check";
 import Edit from "./edit";
 import { getServerUserList, setCaptain, resetCaptain } from "@/api/userManage";
+import { getCompanyList } from "@/api/dataManage";
 import { getPlotList } from "@/api/common";
 import { mapState } from "vuex";
 import AddressCascader from "@/components/addressCascader/addressCascader";
@@ -145,7 +151,10 @@ export default {
         {
           title: "姓名",
           key: "realName",
-          width: 100
+          width: 100,
+          render: (h, { row: { realName } }) => {
+            return h("div", realName ? realName : "");
+          }
         },
         {
           title: "手机号",
@@ -160,12 +169,21 @@ export default {
         {
           title: "性别",
           key: "gender",
-          width: 50
+          width: 50,
+          render: (h, { row: { gender } }) => {
+            return h("div", gender === 0 ? "女" : gender === 1 ? "男" : "");
+          }
         },
         {
           title: "用户状态",
           key: "status",
-          width: 100
+          width: 100,
+          render: (h, { row: { status } }) => {
+            return h(
+              "div",
+              this.$options.filters.statusName(status, "FsUserStatus")
+            );
+          }
         },
         // {
         //   title: "是否队长",
@@ -173,9 +191,76 @@ export default {
         //   width: 100
         // },
         {
-          title: "角色",
+          title: "角色-负责区域",
           key: "position",
-          minWidth: 100
+          minWidth: 150,
+          render: (
+            h,
+            {
+              row: {
+                security,
+                maintenance,
+                propertyManage,
+                salesman,
+                propertyPCA,
+                propertyPlotName,
+                securityList, 
+                maintainList
+              }
+            }
+          ) => {
+            let position = [];
+            // if (security) {
+            //   position.push("安保");
+            // }
+            if (maintenance) {
+              position.push("维保");
+            }
+            // if (propertyManage) {
+            //   position.push("物管");
+            // }
+            // if (salesman) {
+            //   position.push("业务");
+            // }
+            let html = [];
+            if (propertyManage && propertyPCA && propertyPlotName) {  // 如果是物管
+              html.push(h("div", '物管'))
+              html.push(h("div", propertyPCA + "-" + propertyPlotName));
+            }
+            if (security) { // 安保
+                html.push(h('div', '安保'))
+                if (securityList && securityList.length > 0) {
+                    for (let i= 0; i< securityList.length; i++) {
+                        let {securityPca, securityPlotName} = securityList[i]
+                        securityPlotName = securityPlotName.split(',')
+                        for (let j = 0; j< securityPlotName.length; j++) {
+                            html.push(h('div',securityPca + "-" + securityPlotName[j] ))
+                        }
+                    }
+                }
+            }
+            if (maintenance) { // 维保
+                html.push(h('div', '维保'))
+                if (maintainList && maintainList.length > 0) {
+                    for (let i= 0; i< maintainList.length; i++) {
+                        let {maintainPca, maintainStreetName} = maintainList[i]
+                        maintainStreetName = maintainStreetName.split(',')
+                        for (let j = 0; j< maintainStreetName.length; j++) {
+                            html.push(h('div',maintainPca + "-" + maintainStreetName[j] ))
+                        }
+                    }
+                }
+            }
+            if (salesman) { // 业务
+                html.push(h('div', '业务'))
+            }
+            return h("div", html);
+          }
+        },
+        {
+          title: "所属公司",
+          key: "companyName",
+          minWidth: 150
         },
         // {
         //   type: "html",
@@ -201,9 +286,15 @@ export default {
         //   minWidth: 150
         // },
         {
-          title: "注册时间",
-          key: "createTime",
-          width: 155
+          title: "更新时间",
+          key: "updateTime",
+          width: 155,
+          render: (h, { row: { updateTime } }) => {
+            return h(
+              "div",
+              this.$moment(updateTime * 1000).format("YYYY-MM-DD HH:mm:ss")
+            );
+          }
         },
         //默认为0,0:不是队长,1:保安队长,2维保队长,3安保与维保队长
         {
@@ -212,18 +303,15 @@ export default {
           align: "center",
           width: 120,
           render: (h, params) => {
-            if (
-              params.row.security === 1 &&
-              params.row.status ===
-                this.$options.filters.statusName("2", "FsUserStatus")
-              
-            ) {
+            if (params.row.security === 1 && params.row.status === 2) {
               let switchBtn = h(
                 "i-switch",
                 {
                   props: {
                     loading: params.row.captainIsLoading,
-                    disabled: !this.$options.filters.auth(["userM.server.changeCaptain"]),
+                    disabled: !this.$options.filters.auth([
+                      "userM.server.changeCaptain"
+                    ]),
                     value:
                       params.row.captain == 1 || params.row.captain == 3
                         ? true
@@ -253,11 +341,7 @@ export default {
                 ]
               );
               return h("div", [switchBtn]);
-            } else if (
-              params.row.security === 1 &&
-              params.row.status ===
-                this.$options.filters.statusName("2", "FsUserStatus")
-            ) {
+            } else if (params.row.security === 1 && params.row.status === 2) {
               let tag;
               if (params.row.captain) {
                 tag = h(
@@ -290,18 +374,15 @@ export default {
           align: "center",
           width: 120,
           render: (h, params) => {
-            if (
-              params.row.maintenance === 1 &&
-              params.row.status ===
-                this.$options.filters.statusName("2", "FsUserStatus")
-              
-            ) {
+            if (params.row.maintenance === 1 && params.row.status === 2) {
               let switchBtn = h(
                 "i-switch",
                 {
                   props: {
                     loading: params.row.captainIsLoading,
-                    disabled: !this.$options.filters.auth(["userM.server.changeCaptain"]),
+                    disabled: !this.$options.filters.auth([
+                      "userM.server.changeCaptain"
+                    ]),
                     value:
                       params.row.captain == 2 || params.row.captain == 3
                         ? true
@@ -333,8 +414,7 @@ export default {
               return h("div", [switchBtn]);
             } else if (
               params.row.maintenance === 1 &&
-              params.row.status ===
-                this.$options.filters.statusName("2", "FsUserStatus")
+              params.row.status === 2
             ) {
               let tag;
               if (params.row.captain) {
@@ -371,10 +451,7 @@ export default {
           render: (h, params) => {
             let btnGroup = [];
             if (
-              (params.row.status ===
-                this.$options.filters.statusName("0", "FsUserStatus") ||
-                params.row.status ===
-                  this.$options.filters.statusName("1", "FsUserStatus")) &&
+              (params.row.status === 0 || params.row.status === 1) &&
               this.$options.filters.auth(["userM.server.check"])
             ) {
               console.log(params);
@@ -423,10 +500,7 @@ export default {
                 "详情"
               );
               btnGroup.push(btn);
-              if (
-                params.row.status ===
-                this.$options.filters.statusName("2", "FsUserStatus")
-              ) {
+              if (params.row.status === 2) {
                 let editBtn = h(
                   "Button",
                   {
@@ -447,10 +521,7 @@ export default {
                 );
                 btnGroup.push(editBtn);
               }
-            } else if (
-              params.row.status ===
-              this.$options.filters.statusName("-1", "FsUserStatus")
-            ) {
+            } else if (params.row.status === -1) {
               let btn = h(
                 "Button",
                 {
@@ -482,82 +553,6 @@ export default {
       } else {
         return tabCol;
       }
-    },
-    tabData: function() {
-      let tabData = [];
-      for (let i = 0; i < this.list.length; i++) {
-        let {
-          telephone,
-          province,
-          city,
-          area,
-          address,
-          realName,
-          phone,
-          gender,
-          security, // 是否安保
-          securityPCA, // 安保省市区
-          securityPlotName, //  安保的小区名称
-          maintenance, // 是否维保
-          maintenPCA, // 维保省市区,
-          maintenPlotName, // 维保的小区名称
-          propertyManage, // 是否物管
-          propertyPCA, // 物业的省市区
-          propertyPlotName, // 物业的小区名
-          securityCompany,
-          maintenCompany,
-          manageCompany,
-          salesman,
-          status,
-          captain,
-          captainIsLoading,
-          createTime
-        } = this.list[i];
-        let position = [];
-        if (security) {
-          position.push("安保");
-        }
-        if (maintenance) {
-          position.push("维保");
-        }
-        if (propertyManage) {
-          position.push("物管");
-        }
-        if (salesman) {
-          position.push("业务");
-        }
-        tabData.push({
-          realName: realName ? realName : "暂无",
-          telephone,
-          phone,
-          fullAdress: province
-            ? `${province} ${city} ${area} ${address}`
-            : "暂无地址",
-          gender: gender === 0 ? "女" : gender === 1 ? "男" : "",
-          security,
-          securityPlot: securityPlotName
-            ? securityPCA + "<br>" + securityPlotName
-            : "", //  安保的小区名称
-          maintenance,
-          maintenPlot: maintenPlotName
-            ? maintenPCA + "<br>" + maintenPlotName
-            : "", // 维保的小区名称
-          propertyManage,
-          propertyPlot: propertyPlotName
-            ? propertyPCA + "<br>" + propertyPlotName
-            : "", // 物业的小区名
-          position: position.join("、"), // 角色
-          securityCompany: securityCompany,
-          maintenCompany: maintenCompany,
-          manageCompany: manageCompany,
-          status: this.$options.filters.statusName(status, "FsUserStatus"),
-          createTime: this.$options.filters.formatTime(createTime),
-          //   captain: captain === 1 ? "是" : "否",
-          captain,
-          captainIsLoading
-        });
-      }
-      return tabData;
     }
   },
   watch: {
@@ -601,8 +596,10 @@ export default {
         streetCode: null,
         plotNumber: null,
         captainPhone: null,
-        realName: null
+        realName: null,
+        companyId: null
       },
+      companyList: [],
       add: {
         isShow: false
       },
@@ -644,6 +641,7 @@ export default {
   },
 
   mounted() {
+    this.getCompanyList();
     this.getList();
   },
   methods: {
@@ -736,7 +734,7 @@ export default {
      */
     resetSearch() {
       this.$refs["search-form"].resetFields();
-      if( this.companyType !==1 ){
+      if (this.companyType !== 1) {
         this.$refs["addressCascader"].resetData();
       }
       this.searchForm.status = null;
@@ -907,6 +905,21 @@ export default {
           });
         } else {
           this.$Message.error("提交信息有误");
+        }
+      });
+    },
+    /**
+     * 获取公司列表
+     */
+    getCompanyList() {
+      getCompanyList({
+        input: {
+          //   inCompanyTypes: [this.form.companyType],
+          isMincompany: 1
+        }
+      }).then(({ data, errorCode }) => {
+        if (errorCode === 0) {
+          this.companyList = data.list;
         }
       });
     }

@@ -22,7 +22,7 @@
       <FormItem prop="typeName" label="分类名称">
         <Input v-model.trim="form.typeName" placeholder="请填写分类名称" style="width:200px;" />
       </FormItem>
-      <FormItem prop="files.path" label="icon图片">
+      <FormItem label="icon图片">
         <upload v-model="form.files.path" fileNamePrefix="noticeType"></upload>
         <Tag color="warning">*icon图片建议大小为80*80像素</Tag>
       </FormItem>

@@ -33,7 +33,16 @@ import dataManage from '@/views/dataManage/dataManage'
 import plotManage from '@/views/dataManage/plotManage/plotManage'
 import companyManage from '@/views/dataManage/companyManage/companyManage'
 import noticeType from '@/views/dataManage/noticeType/noticeType'
+import businessManage from '@/views/dataManage/businessManage/businessManage'
+// import couponManage from '@/views/dataManage/couponManage/couponManage'
 //数据管理-end
+
+//优惠券管理-start
+import couponManage from '@/views/couponManage/couponManage'
+import couponList from '@/views/couponManage/couponList/couponList'
+import couponOrder from '@/views/couponManage/couponOrder/couponOrder'
+//优惠券管理-end
+
 
 //安装管理-start
 import installManage from '@/views/installManage/installManage'
@@ -142,6 +151,9 @@ export default [{
                 plotManage, // 社区管理
                 companyManage, // 公司管理
                 noticeType, // 物业通知分类
+                businessManage, // 商家管理
+                couponList, // 优惠券列表
+                couponOrder, //优惠券订单
                 //系统设置-systemSetup
                 accessMenu, //权限菜单
                 accountManage, //账号管理
@@ -200,6 +212,7 @@ export default [{
                 plotManage, // 社区管理
                 companyManage, // 公司管理
                 noticeType, // 物业通知分类
+                businessManage, // 商家管理
                 //系统设置-systemSetup
                 accessMenu, //权限菜单
                 accountManage, //账号管理
@@ -491,6 +504,31 @@ export default [{
         ]
     },
     {
+        path: '/couponManage',
+        nanme: 'couponManage',
+        meta: {
+            title: '优惠券管理'
+        },
+        component: couponManage,
+        children: [{
+                path: 'couponList',
+                name: 'couponList',
+                meta: {
+                    title: '优惠券列表'
+                },
+                component: couponList
+            },
+            {
+                path: 'couponOrder',
+                name: 'couponOrder',
+                meta: {
+                    title: '优惠券订单'
+                },
+                component: couponOrder
+            }
+        ]
+    },
+    {
         path: '/dataManage',
         name: 'dataManage',
         meta: {
@@ -513,6 +551,22 @@ export default [{
                 },
                 component: companyManage
             },
+            {
+                path: 'businessManage',
+                name: 'businessManage',
+                meta: {
+                    title: '商家管理'
+                },
+                component: businessManage
+            },
+            // {
+            //     path: 'couponManage',
+            //     name: 'couponManage',
+            //     meta: {
+            //         title: '优惠券管理',
+            //     },
+            //     component: couponManage
+            // },
             {
                 path: 'noticeType',
                 name: 'noticeType',

@@ -3,7 +3,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="60">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="60">
           <FormItem label="名称" prop="input.name">
             <Input v-model.trim="searchForm.input.name" placeholder="请输入名称" style="width:120px;" />
           </FormItem>

@@ -4,7 +4,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="70">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="70">
           <FormItem prop="input.valid" label="是否有效">
             <Select v-model.trim="searchForm.input.valid" style="width:120px;">
               <Option :value="1">有效</Option>
@@ -27,8 +27,9 @@
       </div>
     </div>
     <!-- 顶部操作内容-end -->
-
-    <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="list"></Table>
+    <div class="win-table-wrapper" id="win-table-wrapper">
+      <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="list"></Table>
+    </div>
     <Page
       placement="top"
       :total="page.total"

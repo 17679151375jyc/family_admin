@@ -1,15 +1,9 @@
 <template>
-  <Modal
-    title="添加"
-    v-model.trim="isShow"
-    :mask-closable="false"
-    :loading="loading"
-    :closable="false"
-  >
+  <Modal title="添加主机" v-model.trim="visible" :mask-closable="false" :loading="loading">
     <!-- 右上角关闭按钮-start -->
-    <a class="ivu-modal-close" @click="handleClose">
+    <!-- <a class="ivu-modal-close" @click="handleClose">
       <i class="ivu-icon ivu-icon-ios-close"></i>
-    </a>
+    </a>-->
     <!-- 右上角关闭按钮-start -->
 
     <Form ref="form" :model="form" :rules="rules" :label-width="110">
@@ -21,21 +15,6 @@
 
       <FormItem prop="name" label="主机名称">
         <Input v-model.trim="form.name" placeholder="请填写主机名称" style="width: 200px;" />
-      </FormItem>
-      <FormItem prop="account" label="主机登录号">
-        <Input v-model.trim="form.account" placeholder="主机唯一账号(视频主机机身码)" style="width: 200px;" />
-      </FormItem>
-      <FormItem prop="validateCode" label="视频主机验证码" required v-if="form.type ===1">
-        <Input v-model.trim="form.validateCode" placeholder="请填写视频主机验证码" style="width:200px;" />
-      </FormItem>
-      <FormItem prop="channel" label="通道号" required v-if="form.type ===1">
-        <InputNumber
-          :max="99"
-          :min="1"
-          v-model.trim="form.channel"
-          placeholder="请填写视频主机通道号"
-          style="width:200px;"
-        ></InputNumber>
       </FormItem>
       <FormItem
         v-if="form.type!=null && form.type!==1"
@@ -52,8 +31,23 @@
           >{{ item.installCode }}</Option>
         </Select>
       </FormItem>
-    
-     <Divider orientation="center">{{form.type!==1 ? '绑定区域' :'绑定防区'}}</Divider>
+      <FormItem prop="account" label="主机登录号">
+        <Input v-model.trim="form.account" placeholder="主机唯一账号(视频主机机身码)" style="width: 200px;" />
+      </FormItem>
+      <FormItem prop="validateCode" label="视频主机验证码" required v-if="form.type ===1">
+        <Input v-model.trim="form.validateCode" placeholder="请填写视频主机验证码" style="width:200px;" />
+      </FormItem>
+      <FormItem prop="channel" label="通道号" required v-if="form.type ===1">
+        <InputNumber
+          :max="99"
+          :min="1"
+          v-model.trim="form.channel"
+          placeholder="请填写视频主机通道号"
+          style="width:200px;"
+        ></InputNumber>
+      </FormItem>
+
+      <Divider orientation="center">{{form.type!==1 ? '绑定区域' :'绑定防区'}}</Divider>
       <FormItem prop="phone" label="绑定手机账号">
         <Input v-model.trim="form.phone" placeholder="请输入绑定手机账号" style="width: 200px;" />
       </FormItem>
@@ -101,7 +95,7 @@
     </Form>
 
     <div slot="footer">
-      <Button type="text" @click="handleClose">取消</Button>
+      <Button type="text" @click="visible=false">取消</Button>
       <Button type="primary" @click="submit" :loading="subIsShow">确定</Button>
     </div>
   </Modal>
@@ -113,9 +107,14 @@ import {
   getSetupServerList,
   getDefenceAreaBySecurity
 } from "@/api/hostManage";
+import { mapActions } from "vuex";
 export default {
   props: {
-    isShow: {
+    phone: {
+      type: String,
+      default: null
+    },
+    value: {
       type: Boolean,
       default: false
     },
@@ -126,6 +125,7 @@ export default {
   },
   data() {
     return {
+      visible: false,
       MachineType: this.$options.filters.statusList("MachineType"),
       page: {
         total: 0,
@@ -187,8 +187,21 @@ export default {
         account: [
           {
             required: true,
-            message: "请填写主机上的设备号",
+            message: "请填写主机登录号",
             trigger: "blur"
+          },
+          {
+            validator: (rule, value, callback, source, options) => {
+              let err = [];
+              if (
+                value &&
+                value.substr(0, 1) !=
+                  this.form.installCode.substr(this.form.installCode.length - 1, 1)
+              ) {
+                err = "主机登录号首位字符必须与主机区域码最后一位一致";
+              }
+              callback(err);
+            }
           }
         ],
         areaNumber: [
@@ -205,6 +218,7 @@ export default {
               if (this.form.type !== null && this.form.type !== 1 && !value) {
                 err = "请选择主机区域码";
               }
+
               callback(err);
             }
           }
@@ -228,15 +242,27 @@ export default {
     };
   },
   watch: {
-    isShow: function(val, oldVal) {
-      if (!val) {
-        this.$refs["form"].resetFields();
-      }
-
+    value(val) {
+      this.visible = val;
       if (val) {
         this.getList();
+        this.form.phone = this.phone;
+      } else {
+        this.$refs["form"].resetFields();
       }
     },
+    visible(val) {
+      this.$emit("input", val);
+    },
+    // isShow: function(val, oldVal) {
+    //   if (!val) {
+    //     this.$refs["form"].resetFields();
+    //   }
+
+    //   if (val) {
+    //     this.getList();
+    //   }
+
     "form.phone": function(val, oldVal) {
       console.log(val);
       if (val) {
@@ -257,6 +283,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(["updateOpenHostManageTime"]),
     getList() {
       let { size, current } = this.page;
       let data = {
@@ -327,7 +354,8 @@ export default {
               if (errorCode === 0) {
                 this.$Message.success("添加成功");
                 this.subIsShow = false;
-                this.$emit("handleClose", true);
+                this.visible = false;
+                this.openHostManage();
               }
             })
             .catch(err => {
@@ -349,6 +377,12 @@ export default {
           this.defenceAreaList = data;
         }
       });
+    },
+    /**
+     * 打开防盗主机页
+     */
+    openHostManage() {
+      this.updateOpenHostManageTime(new Date().getTime());
     }
   }
 };

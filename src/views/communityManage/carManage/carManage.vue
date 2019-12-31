@@ -3,21 +3,21 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="70">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="70">
           <FormItem prop="plotNumber" label="所属小区" v-if="!curPlotNumber">
             <div style="display: flex;">
               <address-cascader
                 ref="addressCascader"
                 @onChange="addressCascaderChange"
-                :showLevel="5"
-                style="width: 250px"
+                :showLevel="7"
+                style="width: 380px"
               ></address-cascader>
             </div>
           </FormItem>
           <FormItem label="车牌号码" prop="carNumber">
             <Input v-model.trim="searchForm.carNumber" placeholder="请输入车牌号码" style="width: 120px;" />
           </FormItem>
-          <FormItem label="状态" prop="status">
+          <FormItem label="状态" prop="status"  :label-width="40">
             <Select v-model="searchForm.status" placeholder="请选择状态" style="width:120px;">
               <Option
                 v-for="item in UserCarStatus"
@@ -25,6 +25,12 @@
                 :value="item.code"
               >{{item.name}}</Option>
             </Select>
+          </FormItem>
+          <FormItem label="业主姓名">
+            <Input v-model.trim="searchForm.domicileName" placeholder="请输入业主姓名" style="width: 120px;" />
+          </FormItem>
+          <FormItem label="业主电话">
+            <Input v-model.trim="searchForm.domicilePhone" placeholder="请输入业主电话" style="width: 120px;" />
           </FormItem>
           <!-- <FormItem label="状态" prop="status">
             <Select v-model.trim="searchForm.status" placeholder="请选择状态" style="width:120px;">
@@ -42,7 +48,7 @@
         </ButtonGroup>
       </div>
       <div class="handle-wrapper">
-        <!-- <Button icon="md-add" type="info" @click="showAdd">添加</Button> -->
+        <Button icon="md-add" v-if="$options.filters.auth(['communityM.carManage.add'])" type="info" @click="showAdd">添加</Button>
       </div>
     </div>
     <!-- 顶部操作内容-end -->
@@ -114,14 +120,15 @@ export default {
       searchForm: {
         carNumber: null, // 电话
         status: null,
-        plotNumber: null,
         provinceCode: null,
         cityCode: null,
         areaCode: null,
         streetCode: null,
         plotNumber: null,
         buildingNumber: null,
-        doorNumber: null
+        doorNumber: null,
+        domicileName: null,
+        domicilePhone: null
       },
       add: {
         isShow: false
@@ -166,12 +173,22 @@ export default {
         {
           title: "所属小区",
           key: "plotName",
-          width: 150
+          width: 120
+        },
+        {
+          title: "楼座",
+          key: "buildingName",
+          width: 80
+        },
+        {
+          title: "门号",
+          key: "doorName",
+          width: 80
         },
         {
           title: "状态",
           key: "status",
-          width: 150,
+          width: 120,
           render: (h, params) => {
             return h(
               "div",
@@ -185,7 +202,7 @@ export default {
         {
           title: "车牌号",
           key: "carNumber",
-          width: 120
+          minWidth: 120
         },
         {
           title: "所属人",
@@ -195,7 +212,17 @@ export default {
         {
           title: "电话",
           key: "carownPhone",
-          minWidth: 120
+          width: 120
+        },
+        {
+          title: "业主姓名",
+          key: "domicileName",
+          width: 100
+        },
+        {
+          title: "业主手机号",
+          key: "domicilePhone",
+          width: 120
         },
         {
           title: "更新时间",
@@ -411,6 +438,8 @@ export default {
         this.$refs["buildingCascader"].resetData();
       this.searchForm.daterange = null;
       this.searchForm.startTime = null;
+      this.searchForm.domicileName = null;
+      this.searchForm.domicilePhone = null;
       this.searchForm.endTime = null;
       this.page.current = 1;
       this.getList();
@@ -419,6 +448,7 @@ export default {
      * @method showAdd 显示添加弹窗
      */
     showAdd() {
+      console.log(this.list)
       this.add.isShow = true;
     },
     /**

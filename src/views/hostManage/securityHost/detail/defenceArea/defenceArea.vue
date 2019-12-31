@@ -19,7 +19,12 @@
     <!-- 表格-end -->
 
     <!-- 详情弹窗-start -->
-    <detail @handleClose="detailClose" :isShow="detail.isShow" :number="detail.number"></detail>
+    <detail
+      @handleClose="detailClose"
+      :cameraList="detail.cameraList"
+      :isShow="detail.isShow"
+      :number="detail.number"
+    ></detail>
     <!-- 详情弹窗-end -->
 
     <!-- 添加内容弹窗-start -->
@@ -66,7 +71,8 @@ export default {
       detail: {
         isShow: false,
         id: null,
-        number: null
+        number: null,
+        cameraList: []
       },
       tabIsLoading: false,
       page: {
@@ -133,6 +139,18 @@ export default {
           width: 150
         },
         {
+          title: "关联视频主机名称",
+          width: 150,
+          render: (h, params) => {
+            let names = [];
+            for (let i = 0; i < params.row.cameraList.length; i++) {
+              let { name } = params.row.cameraList[i];
+              names.push(name);
+            }
+            return h("div", names.join("、"));
+          }
+        },
+        {
           title: "操作",
           width: 150,
           align: "center",
@@ -140,7 +158,11 @@ export default {
           fixed: "right",
           render: (h, params) => {
             let btnGroup = [];
-            if (this.$options.filters.auth(['hostM.security.detail.defence.detail'])) {
+            if (
+              this.$options.filters.auth([
+                "hostM.security.detail.defence.detail"
+              ])
+            ) {
               // 详情按钮
               let btn = h(
                 "Button",
@@ -150,7 +172,7 @@ export default {
                     size: "small"
                   },
                   style: {
-                    marginRight: "2px"
+                    margin: "0 2px"
                   },
                   on: {
                     click: () => {
@@ -162,7 +184,9 @@ export default {
               );
               btnGroup.push(btn);
             }
-            if (true) {
+            if (
+              this.$options.filters.auth(["hostM.security.detail.defence.edit"])
+            ) {
               let btn = h(
                 "Button",
                 {
@@ -171,7 +195,7 @@ export default {
                     size: "small"
                   },
                   style: {
-                    marginRight: "5px"
+                    margin: "0 2px"
                   },
                   on: {
                     click: () => {
@@ -183,7 +207,9 @@ export default {
               );
               btnGroup.push(btn);
             }
-            if (this.$options.filters.auth(['hostM.security.detail.defence.del'])) {
+            if (
+              this.$options.filters.auth(["hostM.security.detail.defence.del"])
+            ) {
               let btn = h(
                 "Poptip",
                 {
@@ -220,10 +246,13 @@ export default {
     }
   },
   watch: {
-    macNumber: function(val, oldVal) {
-      if (val) {
-        this.getList();
-      }
+    macNumber: {
+      handler: function(val, oldVal) {
+        if (val) {
+          this.getList();
+        }
+      },
+      immediate: true
     }
   },
   mounted() {},
@@ -280,9 +309,10 @@ export default {
      * @param {Number} index 当前选择的数据的序号
      */
     showDetail(index) {
-      let { number } = this.list[index];
+      let { number, cameraList } = this.list[index];
       this.detail.number = number;
       this.detail.isShow = true;
+      this.detail.cameraList = cameraList;
     },
     /**
      * 关闭详情弹窗

@@ -133,15 +133,15 @@ export default {
           }
         ],
         fsUserNumber: [
-          //   {
-          //     validator: (rule, value, callback, source, options) => {
-          //       let err = [];
-          //       if (this.form.type === 1 && !value) {
-          //         err = "请选择门卡绑定的物管";
-          //       }
-          //       callback(err);
-          //     }
-          //   }
+            {
+              validator: (rule, value, callback, source, options) => {
+                let err = [];
+                if (this.form.type === 1 && !value) {
+                  err = "请选择门卡绑定的物管";
+                }
+                callback(err);
+              }
+            }
         ]
       }
     };

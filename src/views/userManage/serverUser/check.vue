@@ -180,13 +180,13 @@
       <FormItem
         prop="type"
         label="是否队长"
-        v-if="info.propertyManage !== 1 && form.status != statusList[1].value && form.status != statusList[3].value && form.status!==null && (info.maintenance || info.security)"
+        v-if="isShow && info.propertyManage !== 1 && form.status != statusList[1].value && form.status != statusList[3].value && form.status!==null && (info.maintenance || info.security)"
       >
         <Select v-model.trim="form.type" style="width:200px;">
           <Option v-for="(item, index) in typeList" :key="index" :value="item.value">{{item.name}}</Option>
         </Select>
       </FormItem>
-      <FormItem prop="parentNumber" label="所属队长" v-if="form.type === typeList[0].value">
+      <FormItem prop="parentNumber" label="所属队长" v-if="isShow && form.status != statusList[1].value && form.status != statusList[3].value && form.status!==null && form.type === typeList[0].value">
         <Select v-model="form.parentNumber" style="width:200px;">
           <Option
             v-for="(item, index) in captainList"

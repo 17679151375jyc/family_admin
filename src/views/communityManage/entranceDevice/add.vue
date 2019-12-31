@@ -6,6 +6,7 @@
       :mask-closable="false"
       :loading="loading"
       :closable="false"
+      width="540"
     >
       <!-- 右上角关闭按钮-start -->
       <a class="ivu-modal-close" @click="handleClose">
@@ -34,7 +35,7 @@
         <FormItem prop="provinceCode" label="小区楼座" v-show="form.deviceType===0">
           <!--小区门口机-->
           <address-cascader
-            style="width: 300px;"
+            style="width: 400px;"
             ref="addressCascader0"
             :clearable="false"
             :showLevel="7"
@@ -44,7 +45,7 @@
         <FormItem prop="provinceCode" label="小区楼座" v-show="form.deviceType===1">
           <!--楼座门口机-->
           <address-cascader
-            style="width: 300px;"
+            style="width: 400px;"
             ref="addressCascader1"
             :clearable="false"
             :showLevel="6"
@@ -66,7 +67,7 @@
         <FormItem prop="positionDesc" label="设备位置">
           <Input v-model.trim="form.positionDesc" placeholder="请输入设备位置描述" style="width:200px;" />
         </FormItem>
-        <FormItem prop="files.path" label="logo图片">
+        <FormItem label="logo图片">
           <upload v-model="form.files.path" fileNamePrefix="entranceDevice"></upload>
         </FormItem>
       </Form>
@@ -257,6 +258,7 @@ export default {
      * 选择市省区改变时
      */
     addressOnChange(value, obj) {
+    
       this.form.provinceCode = obj[0] && obj[0].value;
       this.form.provinceName = obj[0] && obj[0].label;
 
@@ -277,6 +279,12 @@ export default {
 
       this.form.doorNumber = obj[6] && obj[6].value;
       this.form.doorName = obj[6] && obj[6].label;
+      if (this.form.deviceType === 0){ // 小区门口机
+        this.form.positionDesc = this.form.doorName
+        
+      } else if (this.form.deviceType === 1){ // 楼座门口机
+        this.form.positionDesc = this.form.buildingName
+      }
     },
     /**
      * 选择小区改变时
@@ -297,7 +305,6 @@ export default {
           let {
             positionDesc,
             deviceType,
-            logoUrl,
             deviceName,
             deviceAccount,
             files,
@@ -323,7 +330,6 @@ export default {
           addEntranceDevice({
             positionDesc,
             deviceType,
-            logoUrl,
             deviceName,
             deviceAccount,
             deviceRoleType,

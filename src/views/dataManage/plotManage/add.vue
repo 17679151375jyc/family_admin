@@ -34,6 +34,9 @@
         <Button type="info" size="small" @click="showAmap">地图选择</Button>
       </FormItem>
       <FormItem prop="latitude" label="详细坐标" v-show="false"></FormItem>
+      <FormItem prop="plotPhone" label="联系手机">
+        <Input v-model.trim="form.plotPhone" placeholder="请输入联系手机" style="width:250px;" />
+      </FormItem>
       <FormItem prop="communityCanUse" label="小区类型">
         <RadioGroup v-model.trim="form.communityCanUse">
           <Radio :label="1">用于社区和安装区域</Radio>
@@ -49,25 +52,23 @@
       <FormItem prop="parkId" label="停车场ID" v-if="form.communityCanUse==1">
         <Input v-model.trim="form.parkId" placeholder="请填写停车场ID" style="width:250px;" />
       </FormItem>
-      <FormItem prop="faceCount" label="添加家人人脸个数" v-if='form.communityCanUse'>
+      <FormItem prop="faceCount" label="添加家人人脸个数" v-if="form.communityCanUse">
         <InputNumber
           :max="9999"
-          :min="5"
           v-model="form.faceCount"
           style="width:250px;"
           placeholder="请输入要添加的家人人脸个数"
         ></InputNumber>
       </FormItem>
-      <FormItem prop="accountCount" label="　每户账号个数 （包含邀请家人)" v-if='form.communityCanUse'>
+      <FormItem prop="accountCount" label="　每户账号个数 （包含邀请家人)" v-if="form.communityCanUse">
         <InputNumber
           :max="9999"
-          :min="5"
           v-model="form.accountCount"
           style="width:250px;"
           placeholder="请输入每户账号个数"
         ></InputNumber>
       </FormItem>
-      <FormItem prop="payType" label="收费类型" v-if='form.communityCanUse'>
+      <FormItem prop="payType" label="收费类型" v-if="form.communityCanUse">
         <Select v-model="form.payType" placeholder="请选择收费类型" style="width: 250px;">
           <Option v-for="(item, index) in PayTypeList" :key="index" :value="item.code">{{item.name}}</Option>
         </Select>
@@ -75,7 +76,7 @@
       <FormItem
         prop="effectiveTime"
         :label="form.payType===2 ? '免费天数' : '有效时间'"
-        v-if="form.payType!=null || form.payType!=undefined"
+        v-if="(form.payType!=null || form.payType!=undefined) && form.communityCanUse"
       >
         <DatePicker
           ref="effectiveTime"
@@ -98,7 +99,7 @@
       </FormItem>
       <!-- <FormItem>
       </FormItem>-->
-      <FormItem prop="temporaryCount" label="访客可预约车辆个数" v-if='form.communityCanUse'>
+      <FormItem prop="temporaryCount" label="访客可预约车辆个数" v-if="form.communityCanUse">
         <InputNumber
           :max="9999"
           :min="0"
@@ -107,32 +108,28 @@
           placeholder="请输入访客可预约车辆个数"
         ></InputNumber>
       </FormItem>
-      <FormItem prop="isIdentity" label="访客是否填写身份证" v-if='form.communityCanUse'>
-          <i-switch v-model="form.isIdentity" :true-value="1" :false-value="0">
-              <span slot="open">是</span>
-              <span slot="close">否</span>
-          </i-switch>
+
+      <FormItem prop="realNameStatus" label="访客是否需填姓名" v-if="form.communityCanUse">
+        <i-switch v-model="form.realNameStatus">
+          <span slot="open">是</span>
+          <span slot="close">否</span>
+        </i-switch>
+      </FormItem>
+      <FormItem prop="idcardStatus" label="访客是否需填身份证" v-if="form.communityCanUse">
+        <i-switch v-model="form.idcardStatus">
+          <span slot="open">是</span>
+          <span slot="close">否</span>
+        </i-switch>
+      </FormItem>
+      <FormItem prop="phoneStatus" label="访客是否需填手机号" v-if="form.communityCanUse">
+        <i-switch v-model="form.phoneStatus">
+          <span slot="open">是</span>
+          <span slot="close">否</span>
+        </i-switch>
       </FormItem>
       <FormItem prop="remark" label="备注">
         <Input type="textarea" v-model="form.remark" :rows="4" />
       </FormItem>
-      <!-- <FormItem prop="longitude" label="小区经度">
-        <InputNumber v-model.trim="form.longitude" placeholder="请输入小区经度" style="width:200px;" />
-      </FormItem>
-      <FormItem prop="latitude" label="小区纬度">
-        <InputNumber v-model.trim="form.latitude" placeholder="请输入小区纬度" style="width: 200px;" />
-      </FormItem>-->
-      <!-- <FormItem label="选取坐标">
-        <el-amap
-          class="amap-container"
-          :center="center"
-          :amap-manager="amapManager"
-          :zoom="zoom"
-          :events="events"
-        >
-          <el-amap-marker vid="marker" :position="marker.position"></el-amap-marker>
-        </el-amap>
-      </FormItem>-->
     </Form>
     <div slot="footer">
       <Button type="text" @click="handleClose">取消</Button>
@@ -186,19 +183,22 @@ export default {
         cityName: "",
         streetName: "",
         plotName: null,
+        plotPhone: null,
         address: "",
         longitude: null, // 经度
         latitude: null, //纬度
         communityCanUse: null, // 小区是否用于加入社区
         companyId: null, // 公司id
         parkId: null,
-        faceCount: 5, // 人脸免费个数
-        accountCount: 5, // 加入社区账号个数
+        faceCount: 3, // 人脸免费个数
+        accountCount: 3, // 加入社区账号个数
         payType: null, // 收费类型
         effectiveTime: null, // 有效时间，收费类型是0，1时为具体时间 ，2时为天数
         remark: null, // 备注
         temporaryCount: 0, //预约车数量
-        isIdentity: 0, // 是否需要填身份证
+        idcardStatus: true, // 访客是否需填身份证号
+        realNameStatus: true, // 访客是否需填姓名
+        phoneStatus: true // 访客是否需要填手机号
       },
       PayTypeList: this.$options.filters.statusList("PayType")
     };
@@ -224,6 +224,22 @@ export default {
             max: 32,
             message: "长度不超过32个字符",
             trigger: "blur"
+          }
+        ],
+        plotPhone: [
+          {
+            required: true,
+            message: "请填写联系手机",
+            trigger: "blur"
+          },
+          {
+            validator: (rule, value, callback) =>{
+              let err = [];
+              if (!this.$options.filters.phone(value)) {
+                err = "请填写正确的手机号码";
+              }
+              callback(err);
+            }
           }
         ],
         address: [
@@ -280,6 +296,15 @@ export default {
             required: true,
             message: "请输入要添加的家人人脸个数",
             trigger: "blur"
+          },
+          {
+            validator: (rule, value, callback, source, options) => {
+              let err = [];
+              if (value < 3) {
+                err = "人脸个数最少设置为3个";
+              }
+              callback(err);
+            }
           }
         ],
         accountCount: [
@@ -288,6 +313,15 @@ export default {
             required: true,
             message: "请输入每户账号个数",
             trigger: "blur"
+          },
+          {
+            validator: (rule, value, callback, source, options) => {
+              let err = [];
+              if (value < 3) {
+                err = "每户账号个数最少设置3个";
+              }
+              callback(err);
+            }
           }
         ],
         payType: [
@@ -303,7 +337,7 @@ export default {
             type: "number",
             required: true,
             message: "请选择有效时间",
-            trigger: 'blur'
+            trigger: "blur"
           }
         ],
         temporaryCount: [
@@ -321,7 +355,7 @@ export default {
     isShow: function(val, oldVal) {
       this.$refs["form"].resetFields();
       this.$refs["addressCascader"].resetData();
-      this.form.city=''
+      this.form.city = "";
     },
     "form.city": function(val, oldVal) {
       if (val && oldVal) {
@@ -336,7 +370,7 @@ export default {
     },
     "form.payType": function(val, oldVal) {
       this.form.effectiveTime = null;
-      this.$refs['effectiveTime'] && this.$refs['effectiveTime'].handleClear()
+      this.$refs["effectiveTime"] && this.$refs["effectiveTime"].handleClear();
     }
   },
   mounted() {
@@ -354,6 +388,7 @@ export default {
         if (valid) {
           let {
             plotName,
+            plotPhone,
             province,
             area,
             city,
@@ -399,13 +434,14 @@ export default {
             effectiveTime,
             remark,
             temporaryCount,
-            isIdentity
+            isIdentity,
+            plotPhone
           })
             .then(({ errorCode }) => {
               if (errorCode === 0) {
                 this.$Message.success("添加成功");
-                this.subIsShow = false;
                 this.$emit("handleClose", true);
+                this.subIsShow = false;
               }
             })
             .catch(err => {
@@ -609,5 +645,3 @@ export default {
   }
 }
 </style>
-
-

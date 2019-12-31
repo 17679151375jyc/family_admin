@@ -85,6 +85,22 @@
           <div class="text">{{info.visitorQuantity}}</div>
         </div>
       </div>
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconId"></i>
+            <span>身份证号</span>
+          </div>
+          <div class="text">{{info.identifyCard}}</div>
+        </div>
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconchepaihao"></i>
+            <span>车牌号</span>
+          </div>
+          <div class="text">{{info.carNumber ? info.carNumber : '无车牌'}}</div>
+        </div>
+      </div>
 
       <div class="row">
         <div class="item">
@@ -101,19 +117,16 @@
           </div>
           <div class="text">{{info.endTime|formatTime}}</div>
         </div>
-      </div>
-
-      <div class="row">
         <div class="item">
           <div class="label">
-            <i class="iconfont iconId"></i>
-            <span>身份证号</span>
+            <i class="iconfont iconcheliang-"></i>
+            <span>访客车牌</span>
           </div>
-          <div class="text">{{info.identifyCard}}</div>
+          <div class="text">{{info.carNumber}}</div>
         </div>
       </div>
 
-      <div class="row">
+      <!-- <div class="row">
         <div class="item">
           <div class="label">
             <i class="iconfont icontupian"></i>
@@ -130,7 +143,7 @@
             </viewer>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
   </Modal>
 </template>
@@ -170,6 +183,7 @@ export default {
         facadePicture: null, // 身份证号
         phone: null, // 业主电话
         realName:null, // 业主姓名
+        carNumber: null //车牌号
       }
     };
   },

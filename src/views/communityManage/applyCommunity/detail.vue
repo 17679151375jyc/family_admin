@@ -29,7 +29,7 @@
             <span>当前状态</span>
           </div>
           <div class="text">
-            <span>{{info.status | statusName('ApplyStatus')}}</span>
+            <span>{{info.status | statusName('ApplyStatus')}}（审核人：{{info.serverUserName}}）</span>
           </div>
         </div>
       </div>

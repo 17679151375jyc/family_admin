@@ -5,6 +5,7 @@
       <div class="search-wrapper">
         <Form
           class="search-form"
+          @keyup.enter.native="search"
           ref="search-form"
           :model="searchForm"
           inline
@@ -193,11 +194,11 @@ export default {
               "div",
               {
                 class: {
-                  "cell-error": params.row.status === 2,
+                  "cell-error": params.row.status === 2 || params.row.deleteStatus === 1,
                   "cell-success": params.row.status === 1
                 }
               },
-              this.$options.filters.statusName(params.row.status, "ApplyStatus")
+              params.row.deleteStatus === 1 ? '禁用' : this.$options.filters.statusName(params.row.status, "ApplyStatus")
             );
           }
         },
@@ -224,17 +225,16 @@ export default {
             );
           }
         },
-        {
-          title: "详细地址",
-          key: "address",
-          minWidth: 150
-        },
-
+        // {
+        //   title: "详细地址",
+        //   key: "address",
+        //   minWidth: 150
+        // },
         {
           title: "申请时间",
           key: "applyTime",
           tooltip: true,
-          width: 155,
+          minWidth: 155,
           render: (h, { row: { applyTime } }) => {
             return h(
               "div",
@@ -304,8 +304,10 @@ export default {
               );
               btnGroup.push(btn);
             }
-
-            return h("div", btnGroup);
+            if (params.row.deleteStatus !== 1){
+                return h("div", btnGroup);
+            }
+            
           }
         }
       ];

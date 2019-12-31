@@ -3,7 +3,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="50">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="50">
           <FormItem label="姓名" prop="realName">
             <Input v-model.trim="searchForm.realName" placeholder="请输入姓名" style="width:120px" />
           </FormItem>
@@ -29,7 +29,7 @@
 
     <!-- 表格-start -->
     <div class="win-table-wrapper" id="win-table-wrapper">
-      <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="tabData"></Table>
+      <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="list"></Table>
     </div>
     <!-- 表格-end -->
 
@@ -50,12 +50,16 @@
     <!-- 分页-end -->
 
     <!-- 添加内容弹窗-start -->
-    <add @handleClose="addClose" :isShow="add.isShow"></add>
+    <add v-model="add.isShow"></add>
     <!-- 添加内容弹窗-end -->
 
     <!-- 编辑内容弹窗-start -->
-    <edit @handleClose="editClose" :isShow="edit.isShow" :id="edit.id"></edit>
+    <edit v-model="edit.isShow" :userNumber="edit.userNumber"></edit>
     <!-- 编辑内容弹窗-end -->
+
+    <!-- 重置密码弹窗-start -->
+    <reset @handleClose="resetClose" :isShow="reset.isShow" :phone="reset.phone"></reset>
+    <!-- 重置密码弹窗-end -->
 
     <!-- 详情内容弹窗-start -->
     <detail
@@ -70,6 +74,7 @@
 <script>
 import add from "./add";
 import edit from "./edit";
+import reset from "./reset";
 import detail from "./detail/detail";
 import { getClientUserList } from "@/api/userManage";
 import { mapState } from "vuex";
@@ -77,7 +82,8 @@ export default {
   components: {
     add,
     edit,
-    detail
+    detail,
+    reset
   },
   data() {
     return {
@@ -92,12 +98,16 @@ export default {
       },
       edit: {
         isShow: false,
-        id: null
+        userNumber: null
       },
       detail: {
         isShow: false,
         phone: null,
         userNumber: null
+      },
+      reset: {
+        isShow: false,
+        phone: null
       },
       tabIsLoading: false,
       page: {
@@ -107,6 +117,18 @@ export default {
         current: 1
       }
     };
+  },
+  watch: {
+    "add.isShow"(val) {
+      if (!val) {
+        this.getList();
+      }
+    },
+    "edit.isShow": function(val) {
+      if (!val) {
+        this.getList();
+      }
+    }
   },
   computed: {
     tabCol: function() {
@@ -169,14 +191,25 @@ export default {
           width: 150
         },
         {
+          title: "身份证号码",
+          key: "identityCard",
+          width: 200
+        },
+        {
           title: "创建时间",
           key: "createTime",
-          minWidth: 150
+          minWidth: 155,
+          render: (h, { row: { createTime } }) => {
+            return h(
+              "div",
+              this.$moment(createTime * 1000).format("YYYY-MM-DD HH:mm:ss")
+            );
+          }
         },
         {
           title: "操作",
           key: "handle",
-          width: 150,
+          width: 200,
           align: "center",
           fixed: "right",
           render: (h, params) => {
@@ -190,7 +223,7 @@ export default {
                     size: "small"
                   },
                   style: {
-                    marginRight: "5px"
+                    margin: "2px"
                   },
                   on: {
                     click: () => {
@@ -202,29 +235,55 @@ export default {
               );
               btnGroup.push(btn);
             }
-
+            if (this.$options.filters.auth(["userM.client.edit"])) {
+              let btn = h(
+                "Button",
+                {
+                  props: {
+                    type: "primary",
+                    size: "small"
+                  },
+                  style: {
+                    margin: "2px"
+                  },
+                  on: {
+                    click: () => {
+                      this.showEdit(params.index);
+                    }
+                  }
+                },
+                "编辑"
+              );
+              btnGroup.push(btn);
+            }
+            if (this.$options.filters.auth(["userM.client.resetPwd"])) {
+              let btn = h(
+                "Button",
+                {
+                  props: {
+                    confirm: true,
+                    title: "你确定要重置吗?",
+                    transfer: true,
+                    type: "warning",
+                    size: "small"
+                  },
+                  style: {
+                    margin: "2px"
+                  },
+                  on: {
+                    click: () => {
+                      this.resetPassword(params.index);
+                    }
+                  }
+                },
+                "重置密码"
+              );
+              btnGroup.push(btn);
+            }
             return h("div", btnGroup);
           }
         }
       ];
-    },
-    tabData: function() {
-      let tabData = [];
-      for (let i = 0; i < this.list.length; i++) {
-        let { nickName, realName, phone, headPortrait, createTime } = this.list[
-          i
-        ];
-        tabData.push({
-          nickName,
-          realName,
-          phone,
-          headPortrait,
-          createTime: createTime
-            ? this.$options.filters.formatTime(createTime)
-            : ""
-        });
-      }
-      return tabData;
     }
   },
   mounted() {
@@ -289,6 +348,13 @@ export default {
         }
       });
     },
+    // 重置密码
+    resetPassword(val) {
+      let { phone } = this.list[val];
+      this.reset.isShow = true;
+      this.reset.phone = phone;
+      console.log(phone);
+    },
     /**
      * @method pageSizeChange 当每页显示的数量改变时
      * @param {Number} event 当前选择每页显示的数量
@@ -328,33 +394,18 @@ export default {
       this.add.isShow = true;
     },
     /**
-     * @method addClose 添加的弹窗关闭时触发
-     * @param {Boolean} isRefresh 是否需要重新加载列表
-     */
-    addClose(isRefresh = false) {
-      this.add.isShow = false;
-      if (isRefresh) {
-        this.getList();
-      }
-    },
-    /**
      * @method showEdit 显示编辑弹窗
      * @param {Number} index 当前要编辑的数据的序号
      */
     showEdit(index) {
-      let { id } = this.list[index];
-      this.edit.id = id;
+      let { userNumber } = this.list[index];
+      this.edit.userNumber = userNumber;
       this.edit.isShow = true;
     },
-    /**
-     * @method editClose 编辑框关闭触发
-     * @param {Boolean} isRefresh 是否需要重新加载列表
-     */
-    editClose(isRefresh = false) {
-      this.edit.isShow = false;
-      if (isRefresh) {
-        this.getList();
-      }
+    // 关闭重置密码
+    resetClose() {
+      this.reset.isShow = false;
+      this.getList();
     },
     showDetail(index) {
       // 显示详情弹窗

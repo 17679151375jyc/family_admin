@@ -3,7 +3,14 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="60">
+        <Form
+          class="search-form"
+          @keyup.enter.native="search"
+          ref="search-form"
+          :model="searchForm"
+          inline
+          :label-width="60"
+        >
           <FormItem prop="plotNumber" label="小区楼座" v-if="!curPlotNumber">
             <div style="display: flex;">
               <address-cascader
@@ -48,18 +55,28 @@
             />
           </FormItem>
 
-          <FormItem label="住户类型">
-            <Select
-              v-model.trim="searchForm.contactRelation"
-              placeholder="请选择住户类型"
-              style="width:120px;"
-            >
+          <FormItem label="住户类型" prop="faceType">
+            <Select v-model.trim="searchForm.faceType" placeholder="请选择住户类型" style="width:120px;">
               <Option
-                v-for="(item, index) in relationList"
+                v-for="(item, index) in $options.filters.statusList('RelationType')"
                 :key="index"
-                :value="item.name"
+                :value="item.code"
               >{{ item.name }}</Option>
             </Select>
+          </FormItem>
+          <FormItem label="业主名称">
+            <Input
+              v-model.trim="searchForm.domicileName"
+              placeholder="请输入业主名称"
+              style="width:120px;"
+            />
+          </FormItem>
+          <FormItem label="业主电话">
+            <Input
+              v-model.trim="searchForm.domicilePhone"
+              placeholder="请输入业主电话"
+              style="width:120px;"
+            />
           </FormItem>
         </Form>
         <ButtonGroup class="btns">
@@ -135,20 +152,6 @@ export default {
   },
   data() {
     return {
-      relationList: {
-        1000: {
-          name: "业主",
-          value: 1000
-        },
-        1001: {
-          name: "家人",
-          value: 1001
-        },
-        1002: {
-          name: "朋友",
-          value: 1002
-        }
-      },
       statusList: this.$config.community.entranceGuard.status,
       list: [],
       plotList: [],
@@ -156,15 +159,16 @@ export default {
         status: null,
         contactName: null,
         contactPhone: null,
-        contactRelation: null,
-
+        faceType: null,
         provinceCode: null,
         cityCode: null,
         areaCode: null,
         streetCode: null,
         plotNumber: null,
         buildingNumber: null,
-        doorNumber: null
+        doorNumber: null,
+        domicileName: null,
+        domicilePhone: null
       },
       add: {
         isShow: false
@@ -241,11 +245,31 @@ export default {
             );
           }
         },
-        // {
-        //   title: "审核状态",
-        //   key: "status",
-        //   width: 120
-        // },
+        {
+          title: "业主名称",
+          key: "domicileName",
+          width: 120
+        },
+        {
+          title: "业主电话",
+          key: "domicilePhone",
+          width: 120
+        },
+        {
+          title: "状态",
+          width: 120,
+          render: (h, { row: { status } }) => {
+            return h(
+              "div",
+              {
+                class: {
+                  "cell-error": status === 4
+                }
+              },
+              this.$options.filters.statusName(status, "FaceStatusType")
+            );
+          }
+        },
         {
           title: "申请人",
           key: "contactName",
@@ -259,8 +283,17 @@ export default {
         },
         {
           title: "住户类型",
-          key: "contactRelation",
-          width: 120
+          key: "faceType",
+          width: 120,
+          render: (h, params) => {
+            return h(
+              "div",
+              this.$options.filters.statusName(
+                params.row.faceType,
+                "RelationType"
+              )
+            );
+          }
         },
         {
           title: "小区楼座",
@@ -319,7 +352,7 @@ export default {
             }
             // if (
             //   (params.row.status === this.statusList[0].name ||
-            //     params.row.status === this.statusList[3].name) 
+            //     params.row.status === this.statusList[3].name)
             // ) {
             //   // 如果为未审核和审核中，就显示出审核按钮
             //   let btn = h(
@@ -477,6 +510,8 @@ export default {
       this.searchForm.daterange = null;
       this.searchForm.startTime = null;
       this.searchForm.endTime = null;
+      this.searchForm.domicileName = null;
+      this.searchForm.domicilePhone = null;
       this.page.current = 1;
       this.searchForm.status = null;
       this.searchForm.contactName = null;

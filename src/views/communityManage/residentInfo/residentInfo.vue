@@ -5,6 +5,7 @@
       <div class="search-wrapper">
         <Form
           class="search-form"
+          @keyup.enter.native="search"
           ref="search-form"
           :model="searchForm"
           inline
@@ -35,16 +36,16 @@
               style="width: 150px;"
             ></building-cascader>
           </FormItem>
-          <FormItem label="业主手机" prop="domicilePhone">
+          <FormItem label="手机号" prop="domicilePhone">
             <Input
               v-model.trim="searchForm.domicilePhone"
-              placeholder="输入业主手机号码"
+              placeholder="输入手机号"
               style="width:120px;"
             />
           </FormItem>
-          <FormItem label="手机号" prop="phone">
+          <!-- <FormItem label="手机号" prop="phone">
             <Input v-model.trim="searchForm.phone" placeholder="输入手机号" style="width:120px;" />
-          </FormItem>
+          </FormItem>-->
           <FormItem label="真实姓名" prop="realName">
             <Input v-model.trim="searchForm.realName" placeholder="请输入真实姓名" style="width: 120px;" />
           </FormItem>
@@ -103,7 +104,7 @@
     <remove-owner :domicileNumber="setOwner.domicileNumber" v-model="setOwner.isShow"></remove-owner>
     <!-- 详情-end -->
     <!-- 编辑内容弹窗-start -->
-    <edit @handleClose="editClose" :isShow="edit.isShow" :id="edit.id"></edit>
+    <edit v-model="edit.isShow" :domicileNumber="edit.domicileNumber"></edit>
     <!-- 编辑内容弹窗-end -->
 
     <!-- 审核弹窗-start -->
@@ -123,7 +124,8 @@ import {
   changeResidentStatus,
   residentRemoveDisable,
   residentSetOwner,
-  residentRemoveOwner
+  residentRemoveOwner,
+  delResident
 } from "@/api/communityManage";
 import { mapState } from "vuex";
 import AddressCascader from "@/components/addressCascader/addressCascader";
@@ -159,7 +161,7 @@ export default {
       plotList: [],
       list: [],
       searchForm: {
-        phone: null, // 电话
+        domicilePhone: null, // 电话
         status: null,
         plotNumber: null,
         provinceCode: null,
@@ -183,7 +185,7 @@ export default {
       },
       edit: {
         isShow: false,
-        id: null
+        domicileNumber: null
       },
       check: {
         isShow: false,
@@ -260,15 +262,33 @@ export default {
             );
           }
         },
-
-        // {
-        //   title: "性别",
-        //   key: "sex",
-        //   width: 80,
-        //   render: (h, { row: { sex } }) => {
-        //     return h("div", sex ? "男" : "女");
-        //   }
-        // },
+        {
+          title: "是否邀请账号",
+          width: 200,
+          render: (
+            h,
+            { row: { inviterName, inviterNumber, inviterPhone } }
+          ) => {
+            let divGroup = [
+              h("div", "被邀账号"),
+              h("div", `邀请人：${inviterName}`),
+              h("div", `手机号：${inviterPhone}`)
+            ];
+            return h(
+              "div",
+              {
+                style: {
+                  margin: "2px"
+                },
+                class: {
+                  //   "cell-info": inviterNumber,
+                  "cell-error": !inviterNumber
+                }
+              },
+              inviterNumber ? divGroup : "否"
+            );
+          }
+        },
         {
           title: "小区",
           key: "plotName",
@@ -285,15 +305,15 @@ export default {
           width: 70
         },
 
-        {
-          title: "详细地址",
-          key: "address",
-          minWidth: 150
-        },
+        // {
+        //   title: "详细地址",
+        //   key: "address",
+        //   minWidth: 150
+        // },
         {
           title: "审核时间",
           key: "applyTime",
-          width: 150,
+          minWidth: 150,
           render: (h, { row: { applyTime } }) => {
             return h(
               "div",
@@ -304,172 +324,258 @@ export default {
         {
           title: "操作",
           key: "handle",
-          width: 200,
+          width: 270,
           fixed: "right",
           render: (h, params) => {
-            let btnGroup = [];
-            if (
-              this.$options.filters.auth(["communityM.residentInfo.detail"])
-            ) {
-              //如果状态为正常和不通过时，才显示详情
-              let btn = h(
-                "Button",
+            if (params.row.delete) {
+              return h(
+                "div",
                 {
-                  props: {
-                    type: "success",
-                    size: "small"
-                  },
                   style: {
-                    margin: "2px"
-                  },
-                  on: {
-                    click: () => {
-                      this.showDetail(params.index);
-                    }
-                  }
-                },
-                "详情"
-              );
-              btnGroup.push(btn);
-            }
-
-            if (
-              this.$options.filters.auth(["communityM.residentInfo.isOwner"]) &&
-              !params.row.isOwner
-            ) {
-              let btn = h(
-                "Poptip",
-                {
-                  props: {
-                    confirm: true,
-                    title: "是否设为业主?",
-                    transfer: true
-                  },
-                  on: {
-                    "on-ok": () => {
-                      this.residentSetOwner(params.row.domicileNumber);
-                    }
+                    display: "flex",
+                    "justify-content": "center",
+                    "align-items": "center"
                   }
                 },
                 [
                   h(
-                    "Button",
+                    "Tag",
                     {
                       props: {
-                        type: "info",
-                        size: "small"
+                        color: "default"
                       },
                       style: {
-                        margin: "2px"
+                        "text-align": "center"
                       }
                     },
-                    "设为业主"
+                    "已退出社区"
                   )
                 ]
               );
-              btnGroup.push(btn);
-            }
-            if (
-              this.$options.filters.auth(["communityM.residentInfo.isOwner"]) &&
-              params.row.isOwner
-            ) {
-              let btn = h(
-                "Button",
-                {
-                  props: {
-                    type: "warning",
-                    size: "small"
-                  },
-                  style: {
-                    margin: "2px"
-                  },
-                  on: {
-                    click: () => {
-                      this.showSetOwner(params.index);
-                    }
-                  }
-                },
-                "取消业主"
-              );
-              btnGroup.push(btn);
-            }
-            if (
-              this.$options.filters.auth([
-                "communityM.residentInfo.changeStatus"
-              ]) &&
-              params.row.status === 1
-            ) {
-              let btn = h(
-                "Poptip",
-                {
-                  props: {
-                    confirm: true,
-                    title: "是否要禁用?",
-                    transfer: true
-                  },
-                  on: {
-                    "on-ok": () => {
-                      this.disableItem(params.index);
-                    }
-                  }
-                },
-                [
-                  h(
-                    "Button",
-                    {
-                      props: {
-                        type: "error",
-                        size: "small"
-                      },
-                      style: {
-                        margin: "2px"
-                      }
+            } else {
+              let btnGroup = [];
+              if (
+                this.$options.filters.auth(["communityM.residentInfo.detail"])
+              ) {
+                //如果状态为正常和不通过时，才显示详情
+                let btn = h(
+                  "Button",
+                  {
+                    props: {
+                      type: "success",
+                      size: "small"
                     },
-                    "禁用"
-                  )
-                ]
-              );
-              btnGroup.push(btn);
-            }
-            if (
-              this.$options.filters.auth([
-                "communityM.residentInfo.removeDisable"
-              ]) &&
-              params.row.status === 3
-            ) {
-              let btn = h(
-                "Poptip",
-                {
-                  props: {
-                    confirm: true,
-                    title: "是否要解除禁用?",
-                    transfer: true
-                  },
-                  on: {
-                    "on-ok": () => {
-                      this.removeDisableItem(params.index);
-                    }
-                  }
-                },
-                [
-                  h(
-                    "Button",
-                    {
-                      props: {
-                        type: "warning",
-                        size: "small"
-                      },
-                      style: {
-                        margin: "2px"
-                      }
+                    style: {
+                      margin: "2px"
                     },
-                    "解禁"
-                  )
-                ]
-              );
-              btnGroup.push(btn);
+                    on: {
+                      click: () => {
+                        this.showDetail(params.index);
+                      }
+                    }
+                  },
+                  "详情"
+                );
+                btnGroup.push(btn);
+              }
+              if (
+                this.$options.filters.auth(["communityM.residentInfo.edit"])
+              ) {
+                let btn = h(
+                  "Button",
+                  {
+                    props: {
+                      type: "primary",
+                      size: "small"
+                    },
+                    style: {
+                      margin: "2px"
+                    },
+                    on: {
+                      click: () => {
+                        this.showEdit(params.index);
+                      }
+                    }
+                  },
+                  "编辑"
+                );
+                btnGroup.push(btn);
+              }
+              if (
+                this.$options.filters.auth([
+                  "communityM.residentInfo.isOwner"
+                ]) &&
+                !params.row.isOwner
+              ) {
+                let btn = h(
+                  "Poptip",
+                  {
+                    props: {
+                      confirm: true,
+                      title: "是否设为业主?",
+                      transfer: true
+                    },
+                    on: {
+                      "on-ok": () => {
+                        this.residentSetOwner(params.row.domicileNumber);
+                      }
+                    }
+                  },
+                  [
+                    h(
+                      "Button",
+                      {
+                        props: {
+                          type: "info",
+                          size: "small"
+                        },
+                        style: {
+                          margin: "2px"
+                        }
+                      },
+                      "设为业主"
+                    )
+                  ]
+                );
+                btnGroup.push(btn);
+              }
+              if (
+                this.$options.filters.auth([
+                  "communityM.residentInfo.isOwner"
+                ]) &&
+                params.row.isOwner
+              ) {
+                let btn = h(
+                  "Button",
+                  {
+                    props: {
+                      type: "warning",
+                      size: "small"
+                    },
+                    style: {
+                      margin: "2px"
+                    },
+                    on: {
+                      click: () => {
+                        this.showSetOwner(params.index);
+                      }
+                    }
+                  },
+                  "取消业主"
+                );
+                btnGroup.push(btn);
+              }
+              if (
+                this.$options.filters.auth([
+                  "communityM.residentInfo.changeStatus"
+                ]) &&
+                params.row.status === 1
+              ) {
+                let btn = h(
+                  "Poptip",
+                  {
+                    props: {
+                      confirm: true,
+                      title: "是否要禁用?",
+                      transfer: true
+                    },
+                    on: {
+                      "on-ok": () => {
+                        this.disableItem(params.index);
+                      }
+                    }
+                  },
+                  [
+                    h(
+                      "Button",
+                      {
+                        props: {
+                          type: "error",
+                          size: "small"
+                        },
+                        style: {
+                          margin: "2px"
+                        }
+                      },
+                      "禁用"
+                    )
+                  ]
+                );
+                btnGroup.push(btn);
+              }
+              if (
+                this.$options.filters.auth([
+                  "communityM.residentInfo.removeDisable"
+                ]) &&
+                params.row.status === 3
+              ) {
+                let btn = h(
+                  "Poptip",
+                  {
+                    props: {
+                      confirm: true,
+                      title: "是否要解除禁用?",
+                      transfer: true
+                    },
+                    on: {
+                      "on-ok": () => {
+                        this.removeDisableItem(params.index);
+                      }
+                    }
+                  },
+                  [
+                    h(
+                      "Button",
+                      {
+                        props: {
+                          type: "warning",
+                          size: "small"
+                        },
+                        style: {
+                          margin: "2px"
+                        }
+                      },
+                      "解禁"
+                    )
+                  ]
+                );
+                btnGroup.push(btn);
+              }
+              if (this.$options.filters.auth(["communityM.residentInfo.del"])) {
+                let btn = h(
+                  "Poptip",
+                  {
+                    props: {
+                      confirm: true,
+                      title: "是否确定删除?",
+                      transfer: true
+                    },
+                    on: {
+                      "on-ok": () => {
+                        this.delItem(params.index);
+                      }
+                    }
+                  },
+                  [
+                    h(
+                      "Button",
+                      {
+                        props: {
+                          type: "error",
+                          size: "small"
+                        },
+                        style: {
+                          margin: "2px"
+                        }
+                      },
+                      "删除"
+                    )
+                  ]
+                );
+                btnGroup.push(btn);
+              }
+              return h("div", { style: { margin: "2px" } }, btnGroup);
             }
-            return h("div", { style: { margin: "2px" } }, btnGroup);
           }
         }
       ];
@@ -486,11 +592,16 @@ export default {
     }
   },
   mounted() {
-    this.searchForm.phone = this.phone;
+    this.searchForm.domicilePhone = this.phone;
     this.getList();
   },
   watch: {
     "setOwner.isShow": function(val) {
+      if (!val) {
+        this.getList();
+      }
+    },
+    "edit.isShow"(val) {
       if (!val) {
         this.getList();
       }
@@ -534,8 +645,8 @@ export default {
      */
     delItem(index) {
       // 删除
-      delAccount({
-        deleteUserId: this.list[index].id
+      delResident({
+        domicileNumber: this.list[index].domicileNumber
       }).then(({ errorCode }) => {
         if (errorCode === 0) {
           this.$Message.success("删除成功");
@@ -603,8 +714,8 @@ export default {
      * @param {Number} index 当前要编辑的数据的序号
      */
     showEdit(index) {
-      let { id } = this.list[index];
-      this.edit.id = id;
+      let { domicileNumber } = this.list[index];
+      this.edit.domicileNumber = domicileNumber;
       this.edit.isShow = true;
     },
     /**

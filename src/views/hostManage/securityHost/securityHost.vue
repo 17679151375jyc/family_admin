@@ -5,14 +5,18 @@
       <div class="search-wrapper">
         <Form
           class="search-form"
+          @keyup.enter.native="search"
           ref="search-form"
           :model="searchForm"
           inline
-          :label-width="90"
+          :label-width="70"
           v-if="searchIsShow"
         >
           <FormItem label="用户手机" prop="phone">
             <Input v-model.trim="searchForm.phone" placeholder="输入手机号" style="width:120px;" />
+          </FormItem>
+          <FormItem label="设备名称" prop="name">
+            <Input v-model.trim="searchForm.name" placeholder="请输入设备名称" style="width:120px;" />
           </FormItem>
           <FormItem label="主机状态" prop="status">
             <Select v-model.trim="searchForm.status" placeholder="主机状态" style="width: 120px;">
@@ -28,7 +32,7 @@
               <Option v-for="item in machineType" :key="item.code" :value="item.code">{{item.name}}</Option>
             </Select>
           </FormItem>
-          <FormItem label="安装区域码" prop="installCode">
+          <FormItem label="安装区域码" prop="installCode" :label-width="80">
             <Select v-model="searchForm.installCode" placeholder="请选择" style="width: 120px;">
               <Option
                 v-for="item in serverList"
@@ -37,12 +41,8 @@
               >{{item.installCode}}</Option>
             </Select>
           </FormItem>
-          <FormItem label="主机登录号" prop="queryAccount">
-            <Input
-              v-model.trim="searchForm.queryAccount"
-              style="width:120px;"
-              placeholder="主机登录号"
-            />
+          <FormItem label="主机登录号" prop="queryAccount" :label-width="80">
+            <Input v-model.trim="searchForm.queryAccount" style="width:120px;" placeholder="主机登录号" />
           </FormItem>
         </Form>
         <ButtonGroup class="btns" v-if="searchIsShow">
@@ -84,7 +84,7 @@
     <!-- 分页-end -->
 
     <!-- 添加内容弹窗-start -->
-    <add @handleClose="addClose" :isShow="add.isShow"></add>
+    <add v-model="add.isShow"></add>
     <!-- 添加内容弹窗-end -->
 
     <!-- 编辑内容弹窗-start -->
@@ -111,6 +111,7 @@ import add from "./add"; // 添加主机
 import edit from "./edit"; // 编辑主机
 import detail from "./detail/detail"; // 主机详情
 import bind from "./bind";
+import {mapState} from 'vuex'
 import {
   getSecurityHostList,
   unBindSectorHost,
@@ -143,6 +144,7 @@ export default {
       list: [], // table数据列表
       searchForm: {
         // 搜索表单
+        name: null,
         phone: null,
         status: null,
         type: null // 主机类型
@@ -189,7 +191,21 @@ export default {
       }
     };
   },
+  watch: {
+    "add.isShow"(val) {
+      if (!val) {
+        this.getList();
+      }
+    },
+    openHostManageTime(val) {
+      //打开防盗主机页
+      this.getList()
+    }
+  },
   computed: {
+    ...mapState({
+      openHostManageTime: state => state.common.openHostManageTime
+    }),
     tabCol: function() {
       return [
         // 表格标题栏
@@ -640,7 +656,7 @@ export default {
 </script>
 <style lang="stylus" scoped>
 // .win-wrapper{
-//     position: relative;
+// position: relative;
 // }
 .wrapper {
   position: fixed;

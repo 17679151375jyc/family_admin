@@ -79,6 +79,15 @@
           </div>
           <div class="text">{{info.address || '无'}}</div>
         </div>
+        <div class="item">
+            <div class="label">
+                <i class="iconfont iconshijian"></i>
+                <span>注册时间</span>
+            </div>
+            <div class="text">
+                {{$moment(info.createTime * 1000).format('YYYY-MM-DD HH:mm:ss')}}
+            </div>
+        </div>
       </div>
       <div class="row" v-if="info.captainName">
         <div class="item">
@@ -87,6 +96,15 @@
             <span>所属队长</span>
           </div>
           <div class="text">{{info.captainName}}</div>
+        </div>
+        <div class="item">
+            <div class="label">
+                <i class="iconfont iconshijian"></i>
+                <span>更新时间</span>
+            </div>
+            <div class="text">
+                {{$moment(info.updateTime * 1000).format('YYYY-MM-DD HH:mm:ss')}}
+            </div>
         </div>
       </div>
 

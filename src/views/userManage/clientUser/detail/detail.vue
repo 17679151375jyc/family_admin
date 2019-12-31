@@ -41,6 +41,39 @@
           </div>
           <div class="text">{{phone}}</div>
         </div>
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconId"></i>
+            <span>身份证号</span>
+          </div>
+          <div class="text">{{identityCard}}</div>
+        </div>
+      </div>
+      <div class="row" v-if="businessName">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconshangjia"></i>
+            <span>对应商家</span>
+          </div>
+          <div class="text">{{businessName}}</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont icontupian"></i>
+            <span>头像</span>
+          </div>
+          <div class="text">
+            <viewer :images="[this.headPortrait]" style="margin:10px;">
+              <div class="flex-imgs">
+                <div class="img-item">
+                  <img :src="this.headPortrait" />
+                </div>
+              </div>
+            </viewer>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -147,7 +180,10 @@ export default {
     return {
       list: [],
       realName: null, // 真实姓名
-      nickName: null //昵称
+      nickName: null, //昵称
+      headPortrait: null,
+      identityCard: null,
+      businessName: null
     };
   },
   watch: {
@@ -167,9 +203,14 @@ export default {
         userNumber: this.userNumber
       }).then(({ data, errorCode }) => {
         if (errorCode === 0) {
-          let { nickName, realName } = data;
+          let { nickName, realName, identityCard, headPortrait, businessName} = data;
           this.nickName = nickName;
           this.realName = realName;
+          this.identityCard = identityCard;
+          this.businessName = businessName
+          this.headPortrait = headPortrait
+            ? headPortrait
+            : require("@/assets/images/none.png");
         }
       });
     },
@@ -189,6 +230,36 @@ export default {
 
 >>>.ivu-tree-children>li {
   margin-top: 0;
+}
+
+.ivu-tabs-content {
+  .ivu-tabs-tabpane {
+    .win-wrapper {
+      position: relative;
+    }
+  }
+}
+
+.flex-imgs {
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  margin-right: 10px;
+
+  .img-item {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.15);
+
+    img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
 }
 </style>
 

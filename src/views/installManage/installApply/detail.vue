@@ -22,16 +22,6 @@
           </div>
           <div class="text">{{info.companyName}}</div>
         </div>
-
-        <div class="item">
-          <div class="label">
-            <i class="iconfont icondianshi-f"></i>
-            <span>电视编号</span>
-          </div>
-          <div class="text">{{info.tvNo ? info.tvNo : '无'}}</div>
-        </div>
-      </div>
-      <div class="row">
         <div class="item">
           <div class="label">
             <i class="iconfont iconyonghu"></i>
@@ -39,13 +29,21 @@
           </div>
           <div class="text">{{info.name}}</div>
         </div>
-
+      </div>
+      <div class="row">
         <div class="item">
           <div class="label">
             <i class="iconfont iconId"></i>
             <span>身份证号</span>
           </div>
           <div class="text">{{info.credentialNo}}</div>
+        </div>
+        <div class="item">
+          <div class="label">
+            <i class="iconfont icondianshi-f"></i>
+            <span>小区名称</span>
+          </div>
+          <div class="text">{{info.plotName ? info.plotName : '无'}}</div>
         </div>
       </div>
       <div class="row">
@@ -64,7 +62,25 @@
           <div class="text">{{info.detailedAddress}}</div>
         </div>
       </div>
-
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconicon-test"></i>
+            <span>楼座</span>
+          </div>
+          <div class="text">
+            <span>{{ info.buildingName ? info.buildingName+'座':'' }}</span>
+          </div>
+        </div><div class="item">
+          <div class="label">
+            <i class="iconfont iconmenchuangmenchuangwujinanzhuang"></i>
+            <span>门牌号</span>
+          </div>
+          <div class="text">
+            <span>{{ info.doorName ? info.doorName:'' }}</span>
+          </div>
+        </div>
+      </div>
       <div class="row">
         <div class="item">
           <div class="label">
@@ -75,11 +91,11 @@
         </div>
         <div class="item">
           <div class="label">
-            <i class="iconfont iconstatus"></i>
-            <span>状态</span>
+            <i class="iconfont iconshouji"></i>
+            <span>紧急联系电话</span>
           </div>
           <div class="text">
-            <span>{{info.state | statusName('ApplyInstallState')}}</span>
+            <span>{{info.emergencyContacts }}</span>
           </div>
         </div>
       </div>
@@ -99,7 +115,6 @@
           </div>
           <div class="text">{{info.fsUserPhone}}</div>
         </div>
-        
       </div>
       <div class="row">
         <div class="item">
@@ -124,18 +139,17 @@
           <div
             class="text"
           >{{info.settleAccountsType ? $config.installManage.installApply.settleAccountsType[info.settleAccountsType].name : ''}}</div>
-        </div>         -->
+        </div>-->
       </div>
-      
 
-      <div class="row">   
+      <div class="row">
         <div class="item">
           <div class="label">
             <i class="iconfont iconliwu--"></i>
             <span>套餐名</span>
           </div>
           <div class="text">{{info.applyPackage?info.applyPackage.name:''}}</div>
-        </div>     
+        </div>
         <div class="item">
           <div class="label">
             <i class="iconfont iconzhifu"></i>
@@ -149,16 +163,33 @@
         <div class="item">
           <div class="label">
             <i class="iconfont iconjiage"></i>
-            <span>发票金额(元)</span>
+            <span>套餐押金</span>
           </div>
-          <div class="text">{{info.invoiceAmount ? info.invoiceAmount.toFixed(2) : ''}}</div>
+          <div class="text">{{info.applyPackage.packageDeposit?info.applyPackage.packageDeposit.toFixed(2):''}}</div>
         </div>
         <div class="item">
           <div class="label">
             <i class="iconfont iconjiage"></i>
-            <span>押金</span>
+            <span>设备押金</span>
           </div>
           <div class="text">{{info.deposit?info.deposit.toFixed(2):''}}</div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconjiage"></i>
+            <span>设备费用</span>
+          </div>
+          <div class="text">{{dataPriceAll?dataPriceAll.toFixed(2):''}}</div>
+        </div>
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconjiage"></i>
+            <span>设备服务费用</span>
+          </div>
+          <div class="text">{{info.deviceServicePrice?info.deviceServicePrice.toFixed(2):''}}</div>
         </div>               
       </div>
 
@@ -166,18 +197,36 @@
         <div class="item">
           <div class="label">
             <i class="iconfont iconjiage"></i>
+            <span>套餐服务费用</span>
+          </div>
+          <div class="text">{{info.packagePrice?info.packagePrice.toFixed(2):''}}</div>            
+        </div>
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconjiage"></i>
+            <span>发票金额(元)</span>
+          </div>
+          <div class="text">{{info.invoiceAmount ? info.invoiceAmount.toFixed(2) : ''}}</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconjiage"></i>
             <span>总金额</span>
           </div>
           <div class="text">{{info.orderPrice?info.orderPrice.toFixed(2):''}}</div>
-        </div> 
-        <!-- <div class="item">
+        </div>
+        <div class="item">
           <div class="label">
-            <i class="iconfont iconmiaoshu"></i>
-            <span>备注</span>
+            <i class="iconfont iconstatus"></i>
+            <span>状态</span>
           </div>
-          <div class="text">{{ info.remark }}</div>
-        </div>  -->        
-      </div>      
+          <div class="text">
+            <span>{{info.state | statusName('ApplyInstallState')}}</span>
+          </div>
+        </div>
+      </div>
       <div class="row">
         <div class="item">
           <div class="label">
@@ -192,6 +241,15 @@
             <span>更新时间</span>
           </div>
           <div class="text">{{info.updateTime|formatTime}}</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconmiaoshu"></i>
+            <span>备注</span>
+          </div>
+          <div class="text">{{ info.remark }}</div>
         </div>
       </div>
       <div class="row">
@@ -280,6 +338,7 @@ export default {
   },
   data() {
     return {
+      dataPriceAll: null,//设备总费用
       BusinessType: this.$options.filters.statusList("BusinessType"),
       receive: {
         isShow: false
@@ -289,7 +348,11 @@ export default {
         applyDevices: [], // 新增设备列表
         otherApplyDevices: [], //补充设备
         applyPackage: {
-          applyDevices: []
+          applyDevices: [],
+          validMonth: null,//判断条件
+          monthPrice: null,//月费用
+          quarterPrice: null,//季费用
+          yearPrice: null//年费用
         }, //套餐设备
         name: null, // 用户名
         province: null, // 省
@@ -301,11 +364,12 @@ export default {
         bankAccountNo: null, // 银行账号
         bankName: null, // 银行名
         businessNo: null, //
-        fsUserName: null,//业务员姓名
+        fsUserName: null, //业务员姓名
         fsUserNumber: null, //业务员编号
-        fsUserPhone: null,//业务员电话
+        fsUserPhone: null, //业务员电话
         businessType: null, //业务类型1家庭网关+安防设备 2加装安防
         contactPhone: null, // 联系电话
+        emergencyContacts: null,//紧急联系人
         createTime: null, //创建时间
         credentialNo: null, // 身份证号码
         invoiceAmount: null, // 发票金额
@@ -315,12 +379,17 @@ export default {
         tvNo: null, // 电视编号
         updateTime: null,
         withholdAccountType: null, //代扣帐号类型1.新增/更改帐号 2.使用原帐号
-        deposit: null,  // 押金
-        isPay: null,  //是否支付
+        deposit: null, // 押金
+        isPay: null, //是否支付
         orderPrice: null, //总金额
         testType: null,//是否测试（true为测试，false为正式）
         remark: null,//备注
         settleAccountsType: null,//支付类型
+        devicePrice: null,//设备费用
+        deviceServicePrice: null,//设备服务费用
+        buildingName: null,//楼座
+        doorName: null,//门牌号
+       
       }
     };
   },
@@ -358,15 +427,11 @@ export default {
     tabData: function() {
       let data = [];
       for (let i = 0; i < this.info.applyDevices.length; i++) {
-        let {
+        let { name, num, price } = this.info.applyDevices[i];
+        data.push({
           name,
           num,
-          price
-        } = this.info.applyDevices[i]
-        data.push({  
-          name,        
-          num,
-          price: price ? price.toFixed(2):''
+          price: price ? price.toFixed(2) : ""
         });
       }
       return data;
@@ -400,15 +465,11 @@ export default {
       let data = [];
       if (this.info.applyPackage) {
         for (let i = 0; i < this.info.applyPackage.applyDevices.length; i++) {
-          let {
+          let { name, num, price } = this.info.applyPackage.applyDevices[i];
+          data.push({
             name,
             num,
-            price
-          } = this.info.applyPackage.applyDevices[i]
-          data.push({  
-            name,        
-            num,
-            price: price ? price.toFixed(2):''
+            price: price ? price.toFixed(2) : ""
           });
         }
       }
@@ -441,23 +502,19 @@ export default {
     },
     supplementData() {
       let data = [];
-      if(this.info.otherApplyDevices){
+      if (this.info.otherApplyDevices) {
         for (let i = 0; i < this.info.otherApplyDevices.length; i++) {
           for (let j = 0; j < this.info.otherApplyDevices[i].list.length; j++) {
-            let {
+            let { name, num, price } = this.info.otherApplyDevices[i].list[j];
+            data.push({
               name,
               num,
-              price
-            } = this.info.otherApplyDevices[i].list[j]
-            data.push({  
-              name,        
-              num,
-              price: price ? price.toFixed(2):''
+              price: price ? price.toFixed(2) : ""
             });
           }
         }
         return data;
-      }else{
+      } else {
         return [];
       }
     }
@@ -470,7 +527,20 @@ export default {
       }).then(({ data, errorCode }) => {
         if (errorCode === 0) {
           this.info = data;
-          console.log(data);
+
+          var priceAll = 0;
+          for (let item of data.applyDevices) {
+              priceAll += item.price
+          }
+          if (this.info.otherApplyDevices) {
+            for (let i = 0; i < this.info.otherApplyDevices.length; i++) {
+              for (let j = 0; j < this.info.otherApplyDevices[i].list.length; j++) {
+                let { name, num, price, servicePrice } = this.info.otherApplyDevices[i].list[j];
+                priceAll += price
+              }
+            }
+          }
+          this.dataPriceAll = priceAll
         }
       });
     },

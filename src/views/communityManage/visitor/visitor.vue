@@ -3,7 +3,7 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" ref="search-form" :model="searchForm" inline :label-width="80">
+        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="80">
           <FormItem label="小区楼座" v-if="!curPlotNumber">
             <address-cascader
               ref="addressCascader"
@@ -56,7 +56,9 @@
     <!-- 顶部操作内容-end -->
 
     <!-- 表格-start -->
-    <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="tabData"></Table>
+    <div class="win-table-wrapper" id="win-table-wrapper">
+      <Table border stripe highlight-row :loading="tabIsLoading" :columns="tabCol" :data="tabData"></Table>
+    </div>
     <!-- 表格-end -->
 
     <!-- 分页-start -->

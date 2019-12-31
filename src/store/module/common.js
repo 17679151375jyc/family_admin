@@ -1,11 +1,15 @@
 import { getStatusList } from '@/api/common'
 export default {
     state: {
-        statusList: {}
+        statusList: {},
+        openHostManageTime: null // 当这个时间变化时，找开防盗主机页
     },
     mutations: {
         setStatusList(state, statusList) {
             state.statusList = statusList
+        },
+        updateOpenHostManageTime(state, time) {
+            state.openHostManageTime = time
         }
     },
     getters: {
@@ -24,6 +28,10 @@ export default {
                     }
                 })
             })
+        },
+        updateOpenHostManageTime({ commit }, time) {
+            commit('updateOpenHostManageTime', time)
         }
+
     }
 }

@@ -228,9 +228,12 @@ export default {
   computed: {
     statusList: function() {
       let statusList = this.$options.filters.statusList("ApplyStatus");
+      
       for (let i = 0; i < statusList.length; i++) {
         if (statusList[i].code === 0) {
           statusList[i].isHidden = true;
+        } else {
+            statusList[i].isHidden = false
         }
       }
       //   statusList[0].isHidden = true;

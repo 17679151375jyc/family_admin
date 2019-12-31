@@ -1,20 +1,9 @@
 <template>
-  <Modal
-    title="编辑"
-    v-model.trim="isShow"
-    :mask-closable="false"
-    :loading="loading"
-    :closable="false"
-  >
-    <!-- 右上角关闭按钮-start -->
-    <a class="ivu-modal-close" @click="handleClose">
-      <i class="ivu-icon ivu-icon-ios-close"></i>
-    </a>
-    <!-- 右上角关闭按钮-start -->
-
+  <Modal title="编辑" v-model.trim="visible" :mask-closable="false" :loading="loading">
     <Form ref="form" :model="form" :rules="rules" :label-width="120">
       <FormItem prop="files.path" label="广告图片">
-        <upload v-model="form.files.path" fileNamePrefix="advertisement"></upload>
+        <upload v-model="form.files.path" fileNamePrefix="advertisement" :type="uploadType"></upload>
+        <Tag v-if="form.type===0">上传格式为mp4的视频，且大小不能超过50M</Tag>
       </FormItem>
       <FormItem label="是否全局">
         <i-switch v-model="form.streetShow" @on-change="valueStaChang">
@@ -38,8 +27,32 @@
           <span slot="close">无效</span>
         </i-switch>
       </FormItem>
+      <FormItem v-if="form.valueSta" prop="startTime" label="生效时间">
+        <DatePicker 
+          v-model="form.startTime"
+          type="datetime" 
+          format="yyyy-MM-dd HH:mm" 
+          placeholder="请选择生效时间" 
+          style="width: 200px"></DatePicker>
+      </FormItem>
+      <FormItem label="是否分时段广告">
+        <i-switch size="large" v-model="form.glodenStatus">
+          <span slot="open">是</span>
+          <span slot="close">否</span>
+        </i-switch>
+      </FormItem>
+      <FormItem prop="glodenTime" label="分时时间段" v-if="form.glodenStatus">
+        <TimePicker 
+          type="timerange"
+          format="HH:mm" 
+          placeholder="请选择分时时间段" 
+          style="width: 140px"
+          v-model="form.glodenTime"
+          ></TimePicker>
+      </FormItem>
       <FormItem prop="noticeTypeNumber" label="轮播时间(秒)">
         <Select v-model.trim="form.noticeTypeNumber" placeholder="输入轮播时间" style="width: 140px;">
+          <Option :value="5">5s</Option>
           <Option
             v-for="(item,index) in activeTime"
             :value="item*activeTime"
@@ -47,30 +60,35 @@
           >{{ item*activeTime }}s</Option>
         </Select>
       </FormItem>
+      <FormItem prop="effectiveTime" label="广告有效时间">
+        <DatePicker
+          v-model.trim="form.effectiveTime"
+          type="date"
+          placeholder="选择广告有效时间"
+          style="width: 250px"
+        ></DatePicker>
+      </FormItem>
     </Form>
     <div slot="footer">
-      <Button type="text" @click="handleClose">取消</Button>
-      <Button type="primary" @click="submit" :loading="subIsShow">确定</Button>
+      <Button type="text" @click="visible=false">取消</Button>
+      <Button type="primary" @click="submit" :loading="subIsLoading">确定</Button>
     </div>
   </Modal>
 </template>
 <script>
 import {
-  AddAdvertisementList,
   getAdvertisementDetail,
   UpdateAdvertisementList
 } from "@/api/communityManage";
-import { getPlotDetail } from "@/api/dataManage";
-import { getPlotList } from "@/api/common";
 import addressCascader from "@/components/addressCascader/addressCascader";
-import upload from '@/components/upload/upload'
+import upload from "@/components/upload/upload";
 export default {
   components: {
     addressCascader,
     upload
   },
   props: {
-    isShow: {
+    value: {
       type: Boolean,
       default: false
     },
@@ -93,6 +111,8 @@ export default {
   },
   data() {
     return {
+      timeValue: ['05:02', '07:08'],
+      visible: false,
       ploNumber: null,
       dedail: {
         id: null,
@@ -103,11 +123,14 @@ export default {
       valueSta: null,
       plotList: [],
       effecTive: null,
-      subIsShow: false,
+      subIsLoading: false,
       form: {
         arrdessPolt: null, //小区全名
         streetShow: null, //是否全局
         valueSta: null, //是否有效
+        startTime: null,//生效时间
+        glodenStatus: null,//是否分时广告
+        glodenTime: [],//分时时间段
         array: null,
         IsAdver: null,
         AdverTime: null,
@@ -117,11 +140,13 @@ export default {
         areaCode: null, //区
         streetCode: null,
         noticeTypeNumber: null,
+        type: null,
         files: {
           fileName: "门口机广告图片",
           path: "",
           isLoading: false
-        }
+        },
+        effectiveTime: null // 有效时间
       },
       rules: {
         "files.path": [
@@ -145,16 +170,40 @@ export default {
             message: "请选择小区",
             trigger: "blur"
           }
+        ],
+        effectiveTime: [
+          {
+            type: "date",
+            required: true,
+            message: "请选择广告有效时间",
+            trigger: "blur"
+          }
         ]
       }
     };
   },
   watch: {
-    isShow: function(val, oldVal) {
-      this.$refs["form"].resetFields();
+    value(val) {
+      this.visible = val;
       if (val) {
         this.getDetail();
+      } else {
+        this.$refs["form"].resetFields();
       }
+    },
+    visible(val) {
+      this.$emit("input", val);
+    }
+  },
+  computed: {
+    uploadType: function() {
+      let uploadType = null;
+      if (this.form.type === 0) {
+        uploadType = "video";
+      } else if (this.form.type === 1) {
+        uploadType = "image";
+      }
+      return uploadType;
     }
   },
   methods: {
@@ -173,7 +222,6 @@ export default {
       }
     },
     getDetail() {
-      console.log(this.id);
       getAdvertisementDetail({
         id: this.id
       }).then(({ data, errorCode }) => {
@@ -188,9 +236,16 @@ export default {
             provinceCode,
             cityCode,
             areaCode,
-            streetCode
+            streetCode,
+            effectiveTime,
+            type,
+            startTime,
+            glodenStatus,
+            glodenStart,
+            glodenEnd,
           } = data;
           console.log(data);
+          this.form.glodenStatus = glodenStatus
           this.form.streetShow =
             globleStatus >= 0 && globleStatus == 0 ? true : false; //初始化全局？
           this.form.valueSta = effective >= 0 && effective == 0 ? true : false; //初始化有效无？
@@ -204,15 +259,16 @@ export default {
           this.form.areaCode = areaCode;
           this.form.streetCode = streetCode;
           this.form.plotNumber = plotNumber;
-          //   this.getgPlot(); //初始化小区number
+          this.form.effectiveTime = new Date(effectiveTime * 1000);
+          this.form.type = type
+          this.$set(this.form, 'type', type)
+          this.form.startTime = new Date(startTime * 1000);
+          this.form.glodenTime = []
+          this.form.glodenTime[0] = this.getGlodenTime(glodenStart)
+          this.form.glodenTime[1] = this.getGlodenTime(glodenEnd)
+          console.log(this.form.glodenTime)
         }
       });
-    },
-    editClose(isRefresh = false) {
-      this.dedail.isShow = false;
-      if (isRefresh) {
-        // this.getList();
-      }
     },
     valueStaChang(data) {
       this.form.streetShow = data;
@@ -224,8 +280,13 @@ export default {
     effecTiveChang(data) {
       this.form.valueSta = data;
     },
-    handleClose() {
-      this.$emit("handleClose");
+    getGlodenTime(startTime){      
+      if(startTime||startTime===0){
+        startTime = startTime<10? '0'+ startTime : startTime + ''
+        startTime = startTime.indexOf('.') > -1?startTime.replace('.', ':'):startTime + ':00'
+        startTime = startTime.length<5?startTime+'0':startTime
+      }
+      return startTime;
     },
     submit() {
       this.$refs["form"].validate(async valid => {
@@ -239,7 +300,11 @@ export default {
             provinceCode, //省
             cityCode, //市
             areaCode, //区
-            streetCode //小区
+            streetCode, //小区
+            effectiveTime, // 有效时间
+            startTime,//生效时间
+            glodenStatus,
+            glodenTime
           } = this.form;
           let data = {
             id: this.id,
@@ -255,19 +320,26 @@ export default {
             provinceCode, //省
             cityCode, //市
             areaCode, //区
-            streetCode //小区
+            streetCode, //小区
+            effectiveTime:
+              new Date(effectiveTime).getTime() / 1000 + 24 * 60 * 60 - 1,
+            startTime: new Date(startTime).getTime()/1000,//生效时间
+            glodenStatus: glodenStatus?1:0,
+            glodenStart: glodenTime[0].replace(':','.'),//分时开始时间
+            glodenEnd: glodenTime[1].replace(':','.'),////分时结束时间 
+
           };
           console.log(data);
           UpdateAdvertisementList(data)
             .then(({ errorCode }) => {
               if (errorCode === 0) {
                 this.$Message.success("编辑成功!");
-                this.$emit("handleClose", true);
-                this.subIsShow = false;
+                this.visible = false;
+                this.subIsLoading = false;
               }
             })
             .catch(err => {
-              this.subIsShow = false;
+              this.subIsLoading = false;
             });
         } else {
           this.$Message.error("提交信息有误!");
@@ -282,8 +354,8 @@ export default {
       this.form.cityCode = value[1];
       this.form.areaCode = value[2];
       this.form.streetCode = value[3];
-      this.form.plotNumber = value[4]
-    },
+      this.form.plotNumber = value[4];
+    }
   }
 };
 </script>

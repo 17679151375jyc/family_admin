@@ -82,7 +82,7 @@ export default {
                       duration: 0,
                       onClose: () => {
                         //TODO 点击时跳到相对应的页面处理
-                        this.audio.pause()
+                        this.audio.pause();
                         setTimeout(() => {
                           this.openAlarmWindow();
                         }, 500);

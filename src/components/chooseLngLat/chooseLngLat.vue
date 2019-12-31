@@ -36,7 +36,7 @@
 <script>
 import Vue from "vue";
 import VueAMap from "vue-amap";
-import config from '@/config/index'
+import config from "@/config/index";
 Vue.use(VueAMap);
 VueAMap.initAMapApiLoader({
   key: config.amap.key,
@@ -58,10 +58,10 @@ export default {
       type: Boolean,
       default: false
     },
-    // keyword: {
-    //   type: String,
-    //   default: ""
-    // },
+    keyword: {
+      type: String,
+      default: ""
+    },
     longitude: {
       // 经度
       type: Number,
@@ -77,7 +77,7 @@ export default {
     let self = this;
     return {
       visible: false,
-      keyword: "",
+      //   keyword: "",
       zoom: 16,
       center: [113.094942, 22.590431],
       amapManager,
@@ -112,14 +112,22 @@ export default {
     };
   },
   watch: {
-    value: function(val, oldVal) {
+    value: function(val) {
+      if (!val) {
+        this.marker = {
+          position: [null, null]
+        };
+      }
       this.visible = val;
     },
     visible: function(val) {
       if (val) {
         if (this.longitude) {
+          // 如果有传坐标点
           this.$set(this.marker, "position", [this.longitude, this.latitude]);
           this.center = [this.longitude, this.latitude];
+        } else {
+          this.getLngLatByAddress(true);
         }
       }
       this.$emit("input", val);
@@ -136,11 +144,7 @@ export default {
           result.poiList.pois.length > 0
         ) {
           let { lng, lat } = result.poiList.pois[0].location;
-          console.log("地图中心点要移动到", lng, lat);
-          debugger;
           if (!isSearch) {
-            // 有传经纬度进来
-            debugger;
             this.$set(this.center, [this.longitude, this.latitude]);
             this.$Message.success("已切换到坐标地点");
           } else {

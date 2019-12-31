@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="homeIsVisible"
     class="wrapper"
     :style="{'background': 'url(' + require('_a/images/bg.jpg') + ')', 'background-size': 'cover'}"
   >
@@ -207,7 +208,8 @@ export default {
     ...mapState({
       token: state => state.user.token,
       jurisdiction: state => state.user.jurisdiction,
-      companyType: state => state.user.companyType
+      companyType: state => state.user.companyType,
+      openHostManageTime: state => state.common.openHostManageTime
     }),
     tagsNavList: function() {
       let indexArr = [];
@@ -249,10 +251,14 @@ export default {
           name: "login"
         });
       }
+    },
+    openHostManageTime(val) { //打开防盗主机页
+      this.addWinPopup({ title: "防盗主机", url: "securityHost" });
     }
   },
   data() {
     return {
+      homeIsVisible: false,
       CompanyType: this.$options.filters.statusList("CompanyType"),
       video: {
         url: "ezopen://open.ys7.com/C92768335/1.live",
@@ -342,7 +348,7 @@ export default {
               url: "accessRecords",
               jurisdiction: ["communityM.accessRecords.view", "all"]
             },
-            
+
             {
               title: "门禁信息",
               url: "entranceGuard",
@@ -361,7 +367,7 @@ export default {
             {
               title: "广告管理",
               url: "advertisement",
-              jurisdiction: ["communityM.advertisement.view", "all"]
+              jurisdiction: ["communityM.advertisingM.view", "all"]
             },
             {
               title: "门卡信息",
@@ -383,7 +389,7 @@ export default {
         {
           icon: "iconkaishixunhu",
           title: "巡更管理",
-          jurisdiction: ["dutyManage","dutyMap","areaDevice","all"],
+          jurisdiction: ["dutyManage", "dutyMap", "areaDevice", "all"],
           children: [
             {
               title: "值班安排",
@@ -437,7 +443,7 @@ export default {
             "hostM.security.view",
             "hostM.security.view",
             "hostM.areaPlotMap",
-            "communityM.entranceDevice.view",
+            "hostM.entranceDevice.view",
             "all"
           ],
           children: [
@@ -460,12 +466,34 @@ export default {
               title: "区域小区地图",
               url: "areaPlotMap",
               jurisdiction: ["hostM.areaPlotMap", "all"]
-            },{
+            },
+            {
               title: "门口设备",
               url: "entranceDevice",
-              jurisdiction: ["communityM.entranceDevice.view", "all"]
-            },
+              jurisdiction: ["hostM.entranceDevice.view", "all"]
+            }
           ]
+        },
+        {
+            icon: 'iconyouhuiquan',
+            title: '优惠券管理',
+            jurisdiction: [
+                'couponM.couponList.view',
+                'couponM.couponOrder.view',
+                "all"
+            ],
+            children: [
+                {
+                    title:'优惠券列表',
+                    url: 'couponList',
+                    jurisdiction: ["couponM.couponList.view", 'all']
+                },
+                {
+                    title:'优惠券订单',
+                    url: 'couponOrder',
+                    jurisdiction: ["couponM.couponOrder.view", 'all']
+                }
+            ]
         },
         {
           icon: "iconyunshujuku",
@@ -474,6 +502,7 @@ export default {
             "common.plogM.view",
             "common.companyM.view",
             "common.noticeType.view",
+            "common.business.view",
             "all"
           ],
           children: [
@@ -486,6 +515,11 @@ export default {
               title: "公司数据",
               url: "companyManage",
               jurisdiction: ["common.companyM.view", "all"]
+            },
+            {
+              title: "商家数据",
+              url: "businessManage",
+              jurisdiction: ["common.business.view", "all"]
             },
             {
               title: "物业通知分类",
@@ -617,7 +651,7 @@ export default {
       ]
     };
   },
-  created() {
+  async created() {
     if (this.companyType === 1) {
       // 如果公司类型为物管，就跳到物管首页
       this.$router.push({
@@ -625,26 +659,13 @@ export default {
       });
     }
     this.handleLoginByToken();
-    this.handleGetStatusList(); // 获取系统状态列表
+    await this.handleGetStatusList(); // 获取系统状态列表
+    setTimeout(() => {
+        this.homeIsVisible = true;
+    },100)
+    
   },
-  mounted() {
-    // setTimeout(() => {
-    //   console.log("初始化完成");
-    //   let url = this.video.url;
-    //   let token = this.video.token;
-    //   var decoder = new EZUIKit.EZUIPlayer({
-    //     id: "playWind",
-    //     autoplay: true,
-    //     url: url,
-    //     accessToken: token,
-    //     decoderPath: "",
-    //     width: 300,
-    //     height: 200
-    //   });
-    //   console.log(decoder);
-    //   decoder.play();
-    // }, 5000);
-  },
+  mounted() {},
   methods: {
     ...mapActions(["handleLoginByToken", "handleGetStatusList"]),
     play() {},
@@ -763,27 +784,6 @@ export default {
   bottom: 0;
   right: 0;
   left: 0;
-
-  /* 定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸 */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-    background-color: #F5F5F5;
-  }
-
-  /* 定义滚动条轨道 内阴影+圆角 */
-  ::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    // border-radius: 10px;
-    background-color: #FFF;
-  }
-
-  /* 定义滑块 内阴影+圆角 */
-  ::-webkit-scrollbar-thumb {
-    // border-radius: 10px;
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    background-color: #aaa;
-  }
 }
 
 .wrapper {

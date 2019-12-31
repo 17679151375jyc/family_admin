@@ -22,7 +22,7 @@
           >{{item.auditStatus ? '已处理' : '未处理'}}</div>
         </div>
         <div class="intro">
-          <b :class="[typeList[item.feedbackType].bgClass]">{{typeList[item.feedbackType].name}}</b>
+          <b >{{typeList[item.feedbackType].name}}</b>
           {{item.feedback}}
         </div>
         <div class="more" v-if="$options.filters.auth(['communityM.feedback.detail'])">
