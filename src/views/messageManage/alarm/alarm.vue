@@ -3,7 +3,14 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="50" >
+        <Form
+          class="search-form"
+          @keyup.enter.native="search"
+          ref="search-form"
+          :model="searchForm"
+          inline
+          :label-width="50"
+        >
           <FormItem label="安装区域码" prop="installCode" :label-width="80">
             <Select v-model.trim="searchForm.installCode" placeholder="主机区域码" style="width:120px;">
               <Option
@@ -118,7 +125,7 @@ export default {
   },
   data() {
     return {
-      phone: '',
+      phone: "",
       AlertMessageStatus: this.$options.filters.statusList(
         "AlertMessageStatus"
       ),
@@ -354,22 +361,34 @@ export default {
             ) {
               // 如果是未处理
               let btn = h(
-                "Button",
+                "Poptip",
                 {
                   props: {
-                    type: "info",
-                    size: "small"
-                  },
-                  style: {
-                    margin: "2px"
+                    confirm: true,
+                    title: "你确定要请求出警吗?",
+                    transfer: true
                   },
                   on: {
-                    click: () => {
+                    'on-ok': () => {
                       this.alertRuquestPolice(params.row.number);
                     }
                   }
                 },
-                "请求出警"
+                [
+                  h(
+                    "Button",
+                    {
+                      props: {
+                        type: "info",
+                        size: "small"
+                      },
+                      style: {
+                        margin: "2px"
+                      }
+                    },
+                    "请求出警"
+                  )
+                ]
               );
               btnGroup.push(btn);
             }

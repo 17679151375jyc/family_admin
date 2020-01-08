@@ -3,7 +3,14 @@
     <!-- 顶部操作内容-start -->
     <div class="handle-container">
       <div class="search-wrapper">
-        <Form class="search-form" @keyup.enter.native="search" ref="search-form" :model="searchForm" inline :label-width="40">
+        <Form
+          class="search-form"
+          @keyup.enter.native="search"
+          ref="search-form"
+          :model="searchForm"
+          inline
+          :label-width="40"
+        >
           <FormItem prop="companyId" label="所属公司" :label-width="70">
             <Select v-model.trim="searchForm.companyId" placeholder="请选择所属公司" style="width: 120px;">
               <Option v-for="item in companyList" :value="item.id" :key="item.id">{{item.name}}</Option>
@@ -204,7 +211,7 @@ export default {
                 salesman,
                 propertyPCA,
                 propertyPlotName,
-                securityList, 
+                securityList,
                 maintainList
               }
             }
@@ -223,36 +230,128 @@ export default {
             //   position.push("业务");
             // }
             let html = [];
-            if (propertyManage && propertyPCA && propertyPlotName) {  // 如果是物管
-              html.push(h("div", '物管'))
+            if (propertyManage && propertyPCA && propertyPlotName) {
+              // 如果是物管
+              html.push(h("div", "物管"));
               html.push(h("div", propertyPCA + "-" + propertyPlotName));
             }
-            if (security) { // 安保
-                html.push(h('div', '安保'))
-                if (securityList && securityList.length > 0) {
-                    for (let i= 0; i< securityList.length; i++) {
-                        let {securityPca, securityPlotName} = securityList[i]
-                        securityPlotName = securityPlotName.split(',')
-                        for (let j = 0; j< securityPlotName.length; j++) {
-                            html.push(h('div',securityPca + "-" + securityPlotName[j] ))
-                        }
-                    }
-                }
+            if (security) {
+              // 安保
+              if (securityList && securityList.length > 0) {
+                html.push(
+                  h(
+                    "Tooltip",
+                    {
+                      props: {
+                        theme: "light"
+                      }
+                    },
+                    [
+                      h(
+                        "Button",
+                        {
+                          props: {
+                            size: "small"
+                          },
+                          style: {
+                              'marginRight': '5px'
+                          }
+                        },
+                        [
+                          h("span", "安保区域"),
+                          h("Icon", {
+                            props: {
+                              type: "ios-arrow-down"
+                            },
+                            style: {
+                              marginLeft: "5px"
+                            }
+                          })
+                        ]
+                      ),
+                      h("Tree", {
+                        props: {
+                          data: this.securityTree(securityList)
+                        },
+                        slot: "content"
+                      })
+                    ]
+                  )
+                );
+              } else {
+                h("div", "暂无安保区域");
+              }
+
+              //   if (securityList && securityList.length > 0) {
+              //     for (let i = 0; i < securityList.length; i++) {
+              //       let { securityPca, securityPlotName } = securityList[i];
+              //       securityPlotName = securityPlotName.split(",");
+              //       for (let j = 0; j < securityPlotName.length; j++) {
+              //         html.push(
+              //           h("div", securityPca + "-" + securityPlotName[j])
+              //         );
+              //       }
+              //     }
+              //   }
             }
-            if (maintenance) { // 维保
-                html.push(h('div', '维保'))
-                if (maintainList && maintainList.length > 0) {
-                    for (let i= 0; i< maintainList.length; i++) {
-                        let {maintainPca, maintainStreetName} = maintainList[i]
-                        maintainStreetName = maintainStreetName.split(',')
-                        for (let j = 0; j< maintainStreetName.length; j++) {
-                            html.push(h('div',maintainPca + "-" + maintainStreetName[j] ))
-                        }
-                    }
-                }
+            if (maintenance) {
+              if (maintainList && maintainList.length > 0) {
+                html.push(
+                  h(
+                    "Tooltip",
+                    {
+                      props: {
+                        theme: "light"
+                      }
+                    },
+                    [
+                      h(
+                        "Button",
+                        {
+                          props: {
+                            size: "small"
+                          }
+                        },
+                        [
+                          h("span", "维保区域"),
+                          h("Icon", {
+                            props: {
+                              type: "ios-arrow-down"
+                            },
+                            style: {
+                              marginLeft: "5px"
+                            }
+                          })
+                        ]
+                      ),
+                      h("Tree", {
+                        props: {
+                          data: this.maintainTree(maintainList)
+                        },
+                        slot: "content"
+                      })
+                    ]
+                  )
+                );
+              } else {
+                h("div", "暂无维保区域");
+              }
+              // 维保
+              //   if (maintainList && maintainList.length > 0) {
+              //     for (let i = 0; i < maintainList.length; i++) {
+              //       let { maintainPca, maintainStreetName } = maintainList[i];
+              //       maintainStreetName = maintainStreetName.split(",");
+              //       for (let j = 0; j < maintainStreetName.length; j++) {
+              //         html.push(
+              //           h("div", maintainPca + "-" + maintainStreetName[j])
+              //         );
+              //       }
+              //     }
+              //   }
             }
-            if (salesman) { // 业务
-                html.push(h('div', '业务'))
+            if (salesman) {
+              // 业务
+              html.push(h("div", "业务"));
             }
             return h("div", html);
           }
@@ -922,6 +1021,54 @@ export default {
           this.companyList = data.list;
         }
       });
+    },
+    // 树状化安保区域数据
+    securityTree: function(securityList) {
+      let securityTree = [];
+      if (securityList && securityList.length !== 0) {
+        for (let i = 0; i < securityList.length; i++) {
+          let { securityPca, securityPlotName } = securityList[i];
+
+          let securityPlotNames = securityPlotName.split(",");
+          let children = [];
+          for (let j = 0; j < securityPlotNames.length; j++) {
+            children.push({
+              title: securityPlotNames[j]
+              //   expand: true
+            });
+          }
+          securityTree.push({
+            title: securityPca,
+            expand: false,
+            children
+          });
+        }
+      }
+      return securityTree;
+    },
+    // 树状化维保区域数据
+    maintainTree: function(maintainList) {
+      let maintainTree = [];
+      if (maintainList && maintainList.length !== 0) {
+        for (let i = 0; i < maintainList.length; i++) {
+          let { maintainPca, maintainStreetName } = maintainList[i];
+
+          let maintainStreetNames = maintainStreetName.split(",");
+          let children = [];
+          for (let j = 0; j < maintainStreetNames.length; j++) {
+            children.push({
+              title: maintainStreetNames[j]
+              //   expand: true
+            });
+          }
+          maintainTree.push({
+            title: maintainPca,
+            expand: false,
+            children
+          });
+        }
+      }
+      return maintainTree;
     }
   }
 };

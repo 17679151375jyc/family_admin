@@ -412,7 +412,7 @@ export default {
     await this.handleGetStatusList(); // 获取系统状态列表
      setTimeout(() => {
         this.homeIsVisible = true;
-    },100)
+    },500)
     
   },
   mounted() {},

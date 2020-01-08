@@ -80,7 +80,7 @@
     </div>
     <Form ref="form" :model="form" :rules="rules" :label-width="100" style="margin-top:30px;">
       <FormItem prop="status" label="更改状态为">
-        <Select v-model.trim="form.status" placeholder="箐选择要改变的状态" style="width:200px;">
+        <Select v-model.trim="form.status" placeholder="请选择要改变的状态" style="width:200px;">
           <Option
             v-for="item in UserCarStatus"
             :value="item.code"

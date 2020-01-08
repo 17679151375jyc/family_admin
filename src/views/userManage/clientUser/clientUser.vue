@@ -167,7 +167,7 @@ export default {
                     width: 50,
                     height: 50,
                     src:
-                      params.row.headPortrait ||
+                      this.$options.filters.cutImg(params.row.headPortrait) ||
                       require("@/assets/images/none.png")
                   }
                 })

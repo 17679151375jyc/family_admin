@@ -24,6 +24,13 @@
       <template slot="handle" slot-scope="scope">
         <Button
           v-show="$options.filters.auth(['common.companyM.edit'])"
+          type="success"
+          size="small"
+          @click="showDetail(scope.row.id)"
+          style="margin-right: 5px;"
+        >详情</Button>
+        <Button
+          v-show="$options.filters.auth(['common.companyM.edit'])"
           type="primary"
           size="small"
           @click="showEdit(scope.row.id)"
@@ -56,15 +63,21 @@
     <!-- 编辑内容弹窗-start -->
     <edit @handleClose="editClose" :isShow="edit.isShow" :id="edit.id"></edit>
     <!-- 编辑内容弹窗-end -->
+
+    <!-- 详情内容弹窗-start -->
+    <detail @handleClose="detailClose" :isShow="detail.isShow" :id="detail.id"></detail>
+    <!-- 详情内容弹窗-end -->
   </div>
 </template>
 <script>
 import add from "./add";
 import edit from "./edit";
+import detail from "./detail";
 import { delCompany, getCompanyList } from "@/api/dataManage";
 export default {
   components: {
     add,
+    detail,
     edit
   },
   data() {
@@ -73,6 +86,10 @@ export default {
       add: {
         parentId: null,
         code: null,
+        isShow: false
+      },
+      detail: {
+        id: null,
         isShow: false
       },
       edit: {
@@ -121,7 +138,7 @@ export default {
         {
           title: "操作",
           key: "handle",
-          width: 180,
+          width: 230,
           type: "template",
           template: "handle",
           align: "center"
@@ -134,6 +151,14 @@ export default {
     this.getList();
   },
   methods: {
+    // 详情
+    showDetail(id){
+      this.detail.id = id;
+      this.detail.isShow = true;
+    },
+    detailClose(){
+      this.detail.isShow = false;
+    },
     /**
      * @method getList 获取当前的数据列表
      */
@@ -220,6 +245,16 @@ export default {
     showEdit(id) {
       this.edit.id = id;
       this.edit.isShow = true;
+    },
+    /**
+     * @method editClose 编辑的弹窗关闭时触发
+     * @param {Boolean} isRefresh 是否需要重新加载列表
+     */
+    editClose(isRefresh = false) {
+      this.edit.isShow = false;
+      if (isRefresh) {
+        this.getList();
+      }
     },
     /**
      * @method editClose 编辑的弹窗关闭时触发

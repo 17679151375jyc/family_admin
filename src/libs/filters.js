@@ -60,7 +60,7 @@ export const statusList = (typeName) => {
     if (statusListArr[typeName]) {
         return statusListArr[typeName]
     } else {
-        []
+        return []
     }
 }
 
@@ -116,4 +116,14 @@ export const identityCard = (val) => {
 export const auth = (authArr) => {
     authArr.push('all')
     return hasOneOf(authArr, store.state.user.jurisdiction)
+}
+
+//过滤图片，按指定的尺寸大小返回
+export const cutImg = (url, w, h) => {
+    w = w || 100
+    h = h || 100
+    if (url && url.length > 0 && url.indexOf('family-1257195390.cos.ap-guangzhou.myqcloud.com') != -1) {
+        return url.replace('family-1257195390.cos.ap-guangzhou.myqcloud.com', 'family-1257195390.picgz.myqcloud.com') + '?imageMogr2/thumbnail/' + (w + 'x' + h);
+    }
+    return url;
 }

@@ -50,9 +50,12 @@
         </Select>
       </FormItem>
       <FormItem prop="noticeContent" label="通知内容" style='z-index: 100'>        
-        <div id="divExmied" class="divExmied">
+        <!-- <div id="divExmied" class="divExmied">
           <Spin size="large" fix v-if='loadShow'></Spin>
-        </div>
+        </div> -->
+        <quillText 
+          @getContert="getContert" 
+          :quillValue="quillValue"></quillText>
       </FormItem>
     </Form>
 
@@ -67,34 +70,13 @@ import { addNotice, getManagePersonList } from "@/api/communityManage";
 import addressCascader from "@/components/addressCascader/addressCascader";
 import plotCascader from "@/components/plotCascader/plotCascader";
 import { mapState } from "vuex";
-import { getAuthorization } from "@/api/common";
-import COS from "cos-js-sdk-v5";
-//cos上传
-var cos = new COS({
-  getAuthorization: function(options, callback) {
-    getAuthorization({}).then(({ data, errorCode }) => {
-      if (errorCode === 0) {
-        let { expiredTime, sessionToken, tmpSecretId, tmpSecretKey } = data;
-        callback({
-          TmpSecretId: tmpSecretId,
-          TmpSecretKey: tmpSecretKey,
-          XCosSecurityToken: sessionToken,
-          ExpiredTime: expiredTime
-        });
-      }
-    });
-  }
-});
-
-import E from 'wangeditor';
-var editor = new E('#divExmied');
-editor.customConfig.showLinkImg = true; //网络链接图片
-editor.customConfig.uploadImgShowBase64 = true;//base64本地保存
+import quillText from '_c/quillText/quillText'
 
 export default {
   components: {
     addressCascader,
-    plotCascader
+    plotCascader,
+    quillText
   },
   props: {
     noticeType: {
@@ -124,6 +106,7 @@ export default {
   },
   data() {
     return {
+      quillValue: '',
       loadShow: false,
       subIsShow: false,
       managePersonList: [], // 物管人员列表
@@ -146,7 +129,7 @@ export default {
           {
             required: true,
             message: "请选择通知分类",
-            trigger: "blur"
+            trigger: "change"
           }
         ],
         noticeTitle: [
@@ -160,31 +143,28 @@ export default {
           {
             required: true,
             message: "请选择对应省市区街道",
-            trigger: "blur"
+            trigger: "change"
           }
         ],
         plotNumber: [
           {
             required: true,
             message: "请选择要发布的小区",
-            trigger: "blur"
+            trigger: "change"
           }
         ],
         userNumber: [
           {
             required: true,
             message: "请选择发布物管",
-            trigger: "blur"
+            trigger: "change"
           }
         ],
         noticeContent: [
           {
             validator:(rule, value, callback, source, options) =>{
               let err = [];
-              console.log(editor.txt.text())
-              console.log(this.form.noticeContent)
-              console.log(this.form.pictureLink)
-              if (!editor.txt.text() && !this.form.pictureLink) {
+              if (this.quillValue == '') {
                 err = "请填写通知内容";
               }
               callback(err);
@@ -196,7 +176,8 @@ export default {
   },
   watch: {
     isShow: function(val, oldVal) {
-      this.$refs["form"].resetFields();
+        this.$refs["form"].resetFields();
+        this.quillValue = ''
     },
     "form.plotNumber": function(val, oldVal) {
       this.managePersonList = [];
@@ -220,6 +201,9 @@ export default {
     })
   },
   methods: {
+    getContert(val){
+      this.quillValue = val
+    },
     handleClose() {
       this.$emit("handleClose");
     },
@@ -236,9 +220,10 @@ export default {
       });
     },
     submit() {
+      console.log(this.quillValue)
       this.$refs["form"].validate(async valid => {
         if (valid) {
-          this.form.noticeContent = editor.txt.html();
+          this.form.noticeContent = this.quillValue;
           this.form.pictureLink = null;
           let {
             noticeTitle,
@@ -267,7 +252,6 @@ export default {
               if (errorCode === 0) {
                 this.$Message.success("添加成功");
                 this.subIsShow = false;
-                editor.txt.clear();
                 this.$emit("handleClose", true);
               }
             })
@@ -296,67 +280,11 @@ export default {
     },
   },
   mounted(){    
-    let that = this
-    editor.customConfig.customUploadImg = function (files, insert) {
-        console.log(files)
-        that.loadShow = true;
-        let file = files[0];
-        cos.sliceUploadFile(
-        {
-          Bucket: that.$config.cos.bucket,
-          Region: that.$config.cos.region,
-          Key:
-            that.pathDir +
-            that.fileNamePrefix +
-            "-" +
-            new Date().getTime() +
-            "-" +
-            Math.ceil(Math.random() * 100) +
-            "." + file.type.split("/")[1],
-            Body: file
-        },
-        (err, data) => {
-          console.log("上传完成", err, data);
-          if (err) {
-            that.$Message.error("上传出现错误！");
-          }else{
-            that.loadShow = false;
-            that.form.pictureLink = "https://" + data.Location;
-            insert(that.form.pictureLink)
-          }
-        }
-      );
-        // 上传代码返回结果之后，将图片插入到编辑器中
-    }
-    editor.customConfig.menus = [
-      // 配置表单
-      'emoticon', // 表情
-      'image', // 插入图片
-      'video',
-      'head', // 标题
-      'bold', // 粗体
-      'fontSize', // 字号
-      'fontName', // 字体
-      'italic', // 斜体
-      'underline', // 下划线
-      'strikeThrough', // 删除线
-      'foreColor', // 文字颜色
-      'backColor', // 背景颜色
-      'link', // 插入链接
-      'list', // 列表
-      'justify', // 对齐方式
-      'quote', // 引用
-      'table', // 表格
-      'code', // 插入代码
-      'undo', // 撤销
-      'redo' // 重复
-    ]
-    editor.create()
+    // let that = this
   }
 };
 </script>
 <style lang="stylus" scoped>
-
 >>>.ivu-cascader .ivu-select-dropdown{
   z-index: 9999999!important;
 }

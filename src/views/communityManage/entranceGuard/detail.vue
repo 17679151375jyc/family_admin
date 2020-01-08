@@ -26,7 +26,7 @@
 
         <div class="item">
           <div class="label">
-            <i class="iconfont iconshouji"></i>
+            <i class="iconfont iconleixing-guibingjiedian"></i>
             <span>住户类型</span>
           </div>
           <div class="text">{{info.contactRelation}}</div>

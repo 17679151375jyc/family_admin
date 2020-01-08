@@ -162,37 +162,37 @@ export default {
             return row._index + 1 + (this.page.current - 1) * this.page.size;
           }
         },
-        {
-          title: "访客身份证",
-          width: 100,
-          align: "center",
-          render: (h, params) => {
-            return h(
-              "div",
-              {
-                class: {
-                  "flex-div": true
-                },
-                style: {
-                  display: "flex",
-                  "justify-content": "center",
-                  "align-items": "center"
-                }
-              },
-              [
-                h("img", {
-                  attrs: {
-                    width: 50,
-                    height: 50,
-                    src:
-                      params.row.facadePicture ||
-                      require("@/assets/images/none.png")
-                  }
-                })
-              ]
-            );
-          }
-        },
+        // {
+        //   title: "访客身份证",
+        //   width: 100,
+        //   align: "center",
+        //   render: (h, params) => {
+        //     return h(
+        //       "div",
+        //       {
+        //         class: {
+        //           "flex-div": true
+        //         },
+        //         style: {
+        //           display: "flex",
+        //           "justify-content": "center",
+        //           "align-items": "center"
+        //         }
+        //       },
+        //       [
+        //         h("img", {
+        //           attrs: {
+        //             width: 50,
+        //             height: 50,
+        //             src:
+        //               params.row.facadePicture ||
+        //               require("@/assets/images/none.png")
+        //           }
+        //         })
+        //       ]
+        //     );
+        //   }
+        // },
         {
           title: "状态",
           key: "status",

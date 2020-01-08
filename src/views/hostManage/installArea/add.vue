@@ -23,7 +23,7 @@
       </FormItem>
       <FormItem prop="street" label="省市区街道" v-if="isShow">
         <address-cascader
-          style="width: 250px;"
+          style="width: 380px;"
           ref="addressCascader"
           :clearable="false"
           :showAllText="true"
@@ -86,7 +86,7 @@
   </Modal>
 </template>
 <script>
-import { addArea } from "@/api/dataManage";
+import { addArea, getPlotDetail} from "@/api/dataManage";
 import amap from "./amap";
 import { mapState } from "vuex";
 import addressCascader from "@/components/addressCascader/addressCascader";
@@ -272,6 +272,19 @@ export default {
         }
       },
       immediate: true
+    },
+    'form.plotNumber':function (val) {
+        if (val){
+            getPlotDetail({
+                number: val
+            }).then(({data, errorCode}) => {
+                if (errorCode === 0) {
+                    this.form.address = data.address
+                }
+            })
+        } else {
+            this.form.address = null
+        }
     }
   },
   methods: {

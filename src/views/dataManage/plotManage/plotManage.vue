@@ -65,11 +65,16 @@
     <!-- 编辑内容弹窗-start -->
     <edit @handleClose="editClose" :isShow="edit.isShow" :number="edit.number"></edit>
     <!-- 编辑内容弹窗-end -->
+
+    <!-- 详情内容弹窗-start -->
+    <detail @handleClose="detailClose" :isShow="detail.isShow" :number="detail.number"></detail>
+    <!-- 编辑内容弹窗-end -->
   </div>
 </template>
 <script>
 import add from "./add";
 import edit from "./edit";
+import detail from "./detail";
 import buildingManage from "./buildingManage/buildingManage";
 import { getPlotList, delPlots } from "@/api/dataManage";
 import { mapState } from "vuex";
@@ -79,6 +84,7 @@ export default {
   components: {
     add,
     edit,
+    detail,
     buildingManage,
     addressCascader
   },
@@ -102,6 +108,10 @@ export default {
         plotName: null
       },
       edit: {
+        isShow: false,
+        number: null
+      },
+      detail: {
         isShow: false,
         number: null
       },
@@ -202,11 +212,32 @@ export default {
         {
           title: "操作",
           key: "handle",
-          width: 200,
+          width: 250,
           align: "center",
           fixed: "right",
           render: (h, params) => {
             let btnGroup = [];
+            if (true) {
+              let btn = h(
+                "Button",
+                {
+                  props: {
+                    type: "success",
+                    size: "small"
+                  },
+                  style: {
+                    marginRight: "5px"
+                  },
+                  on: {
+                    click: () => {
+                      this.showDetail(params.index);
+                    }
+                  }
+                },
+                "详情"
+              );
+              btnGroup.push(btn);
+            }
             if (this.$options.filters.auth(["common.plogM.buildingM.view"])) {
               let btn = h(
                 "Button",
@@ -361,6 +392,15 @@ export default {
           this.getList();
         }
       });
+    },
+    showDetail(index){
+      let { plotNumber } = this.list[index];
+      this.detail.number = plotNumber;
+      this.detail.isShow = true;
+    },
+    // 详情
+    detailClose(){
+      this.detail.isShow = false;
     },
     /**
      * @method pageSizeChange 当每页显示的数量改变时

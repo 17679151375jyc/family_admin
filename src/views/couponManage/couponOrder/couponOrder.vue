@@ -246,9 +246,9 @@ export default {
             let txt = null;
             if (couponType === 0) {
               // 折扣券
-              txt = (price - 0) * 10 + "折";
+              txt = ((price - 0) * 10).toFixed(2) + "折";
             } else if (couponType === 1) {
-              txt = price + "元";
+              txt = price.toFixed(2) + "元";
             }
             return h("div", txt);
           }
@@ -297,41 +297,41 @@ export default {
         //     );
         //   }
         // },
-        {
-          title: "操作",
-          key: "handle",
-          width: 160,
-          align: "center",
-          fixed: "right",
-          render: (h, params) => {
-            let btnGroup = [];
-            if (this.$options.filters.auth(["couponM.couponOrder.detail"])) {
-              let btn = h(
-                "Button",
-                {
-                  props: {
-                    type: "success",
-                    size: "small"
-                  },
-                  style: {
-                    margin: "2px"
-                  },
-                  on: {
-                    click: () => {
-                      this.showDetail(params.row.id);
-                    }
-                  }
-                },
-                "详情"
-              );
-              //   btnGroup.push(btn);
-            }
+        // {
+        //   title: "操作",
+        //   key: "handle",
+        //   width: 160,
+        //   align: "center",
+        //   fixed: "right",
+        //   render: (h, params) => {
+        //     let btnGroup = [];
+        //     if (this.$options.filters.auth(["couponM.couponOrder.detail"])) {
+        //       let btn = h(
+        //         "Button",
+        //         {
+        //           props: {
+        //             type: "success",
+        //             size: "small"
+        //           },
+        //           style: {
+        //             margin: "2px"
+        //           },
+        //           on: {
+        //             click: () => {
+        //               this.showDetail(params.row.id);
+        //             }
+        //           }
+        //         },
+        //         "详情"
+        //       );
+        //       //   btnGroup.push(btn);
+        //     }
 
-            // btnGroup.push(delBtn);
-            // }
-            return h("div", btnGroup);
-          }
-        }
+        //     // btnGroup.push(delBtn);
+        //     // }
+        //     return h("div", btnGroup);
+        //   }
+        // }
       ];
     }
   },

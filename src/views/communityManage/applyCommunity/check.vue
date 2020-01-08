@@ -118,7 +118,7 @@
         </Select>
       </FormItem>
       <FormItem prop="audit" label="更改状态为">
-        <Select v-model.trim="form.audit" placeholder="箐选择要改变的状态" style="width:200px;">
+        <Select v-model.trim="form.audit" placeholder="请选择要改变的状态" style="width:200px;">
           <Option
             v-for="item in statusList"
             :value="item.code"

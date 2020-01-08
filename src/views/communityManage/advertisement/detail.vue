@@ -79,7 +79,7 @@
       </div>
 
       <div class="row">
-        <div class="item">
+        <div class="item" v-if="info.type!==0">
           <div class="label">
             <i class="iconfont iconshijian01"></i>
             <span>轮播时间</span>
@@ -92,6 +92,15 @@
             <span>是否全局</span>
           </div>
           <div class="text">{{ info.globleStatus?'否':'是' }}</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconneirongguanli"></i>
+            <span>备注</span>
+          </div>
+          <div class="text">{{ info.remark }}</div>
         </div>
       </div>
 
@@ -112,7 +121,7 @@
               </div>
             </viewer>
           </div>
-          <div class="text" v-if="info.type === 0 && visible">
+          <div class="text" v-if="info.type === 0 && visible && info.url">
             <video controls autoplay name="media" class="video-div">
               <source :src="info.url" type="video/mp4" />
             </video>
@@ -161,7 +170,8 @@ export default {
         cityName: null, //市名
         areaName: null, //区名
         streetName: null, //街道名
-        plotName: null //小区名
+        plotName: null, //小区名
+        remark: null, // 备注
       }
     };
   },
@@ -169,7 +179,9 @@ export default {
     value(val) {
       this.visible = val;
       if (val) {
-        this.getList();
+        this.getDetail();
+      } else {
+          this.info.url = null
       }
     },
     visible(val) {
@@ -184,9 +196,13 @@ export default {
       endTime = endTime<10? '0'+ endTime : endTime + ''
       endTime = endTime.indexOf('.') > -1?endTime.replace('.', ':'):endTime + ':00'
       endTime = endTime.length<5?endTime+'0':endTime
-      return startTime + '-' + endTime
+      if(this.info.glodenStatus){
+        return startTime + '-' + endTime
+      }else{
+        return '00:00-24:00'
+      }
     },
-    getList() {
+    getDetail() {
       getAdvertisementDetail({
         id: this.id
       }).then(({ data, errorCode }) => {

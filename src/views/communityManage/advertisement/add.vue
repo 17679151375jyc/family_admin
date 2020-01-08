@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    title="添加"
-    v-model.trim="visible"
-    :mask-closable="false"
-    :loading="loading"
-  >
+  <Modal title="添加" v-model.trim="visible" :mask-closable="false" :loading="loading">
     <Form ref="form" :model="form" :rules="rules" :label-width="120">
       <FormItem prop="type" label="广告类型">
         <Select placeholde="请选择广告类型" v-model="form.type" style="width:200px;">
@@ -15,7 +10,11 @@
           >{{item.name}}</Option>
         </Select>
       </FormItem>
-      <FormItem prop="files.path" v-if="form.type!=null" :label="`上传${$options.filters.statusName(form.type, 'AdvertisementType')}`">
+      <FormItem
+        prop="files.path"
+        v-if="form.type!=null"
+        :label="`上传${$options.filters.statusName(form.type, 'AdvertisementType')}`"
+      >
         <upload v-model="form.files.path" fileNamePrefix="ggBanner" :type="uploadType"></upload>
         <Tag v-if="form.type===0">上传格式为mp4的视频，且大小不能超过50M</Tag>
       </FormItem>
@@ -32,26 +31,27 @@
             ref="addressCascader"
             @onChange="addressCascaderChange"
             :showLevel="5"
-            style="width: 150px"
+            style="width: 350px"
           ></address-cascader>
         </div>
       </FormItem>
-      
-      <FormItem label="是否有效">
+
+      <!-- <FormItem label="是否有效">
         <i-switch size="large" @on-change="effecTiveChang">
           <span slot="open">有效</span>
           <span slot="close">无效</span>
         </i-switch>
-      </FormItem>
-      
-      <FormItem v-if="form.valueSta" prop="startTime" label="生效时间">
-        <DatePicker 
+      </FormItem> -->
+
+      <FormItem prop="startTime" label="生效时间">
+        <DatePicker
           v-model="form.startTime"
           :options="effectiveTimeOptions"
-          type="datetime" 
-          format="yyyy-MM-dd HH:mm" 
-          placeholder="请选择生效时间" 
-          style="width: 200px"></DatePicker>
+          type="date"
+          format="yyyy-MM-dd"
+          placeholder="请选择生效时间"
+          style="width: 140px"
+        ></DatePicker>
       </FormItem>
       <FormItem label="是否分时段广告">
         <i-switch size="large" @on-change="effecTiveChangKing">
@@ -59,18 +59,17 @@
           <span slot="close">否</span>
         </i-switch>
       </FormItem>
-      <FormItem prop="glodenTime" label="分时时间段" v-if="!form.glodenStatus">
-        <TimePicker 
+      <FormItem prop="glodenTime" label="分时时间段" v-if="form.glodenStatus">
+        <TimePicker
           type="timerange"
-          format="HH:mm" 
-          placeholder="请选择分时时间段" 
+          format="HH:mm"
+          placeholder="请选择分时时间段"
           style="width: 140px"
           v-model="form.glodenTime"
-          hide-disabled-options></TimePicker>
+          hide-disabled-options
+        ></TimePicker>
       </FormItem>
-
-      
-      <FormItem prop="noticeTypeNumber" label="轮播时间(秒)">
+      <FormItem prop="noticeTypeNumber" label="轮播时间(秒)" v-if="form.type!==0">
         <Select v-model.trim="form.noticeTypeNumber" placeholder="输入轮播时间" style="width: 140px;">
           <Option :value="5">5s</Option>
           <Option
@@ -83,11 +82,14 @@
       <FormItem prop="effectiveTime" label="广告有效时间">
         <DatePicker
           v-model.trim="form.effectiveTime"
-          :options="effectiveTimeOptions"
+          :options="IsEffectiveTimeOptions"
           type="date"
           placeholder="选择广告有效时间"
-          style="width: 250px"
+          style="width: 140px"
         ></DatePicker>
+      </FormItem>
+      <FormItem prop="remark" label="备注">
+        <Input v-model="form.remark" type="textarea" :rows="4" placeholder="请填写备注" />
       </FormItem>
     </Form>
     <div slot="footer">
@@ -126,6 +128,7 @@ export default {
   },
   data() {
     return {
+      startTimeValue: Date.now() - 86400000,
       visible: false,
 
       effectiveTimeOptions: {
@@ -135,16 +138,15 @@ export default {
       },
       activeTime: 10,
       streetShow: null,
-      valueSta: null,
       plotList: [],
       effecTive: null,
       subIsLoading: false,
       form: {
         streetShow: null,
-        valueSta: null,
-        startTime: null,//生效时间
-        glodenTime:[],//分时时间段
-        glodenStatus: 1,//是否分时广告
+        // effective: null,
+        startTime: null, //生效时间
+        glodenTime: [], //分时时间段
+        glodenStatus: 0, //是否分时广告
         array: null,
         IsAdver: null,
         AdverTime: null,
@@ -160,7 +162,8 @@ export default {
           path: "",
           isLoading: false
         },
-        effectiveTime: null // 有效时间
+        effectiveTime: null, // 有效时间
+        remark: null // 备注
       },
       rules: {
         glodenTime: [
@@ -173,7 +176,7 @@ export default {
           {
             validator: (rule, value, callback) => {
               let err = [];
-              if (value[0] == ""&&value[1] == "") {
+              if (value[0] == "" && value[1] == "") {
                 err = "请选择分时时间段";
               }
               callback(err);
@@ -234,6 +237,13 @@ export default {
     };
   },
   watch: {
+    'form.startTime':function(val) {
+      if(val){
+        this.startTimeValue = val.valueOf()
+      }else{
+        this.startTimeValue = Date.now() - 86400000
+      }
+    },
     value(val) {
       this.visible = val;
       if (!val) {
@@ -242,8 +252,8 @@ export default {
           this.$refs["addressCascader"].resetData();
       }
     },
-    visible(val){
-        this.$emit('input', val)
+    visible(val) {
+      this.$emit("input", val);
     },
     // isShow: function(val, oldVal) {
     //   this.$refs["form"].resetFields();
@@ -263,21 +273,34 @@ export default {
       let uploadType = null;
       if (this.form.type === 0) {
         uploadType = "video";
-      } else if(this.form.type === 1){
+      } else if (this.form.type === 1) {
         uploadType = "image";
       }
       return uploadType;
+    },
+    IsEffectiveTimeOptions: function(){
+      let that = this
+      return {
+        disabledDate(date) {
+          return date && date.valueOf() < that.startTimeValue
+        }
+      }
     }
   },
   methods: {
     valueStaChang(data) {
       this.form.streetShow = data;
+      if(data){
+        this.form.provinceCode = null;
+        this.form.cityCode = null;
+        this.form.areaCode = null;
+        this.form.streetCode = null;
+        this.form.plotNumber = null;
+      }
     },
-    effecTiveChang(data) {
-      this.form.valueSta = data;
-    },
-    effecTiveChangKing(data){
-      this.form.glodenStatus = data?0:1
+    effecTiveChangKing(data) {
+      console.log(data)
+      this.form.glodenStatus = data ? 1 : 0;
     },
     submit() {
       this.$refs["form"].validate(async valid => {
@@ -286,7 +309,7 @@ export default {
             files, //图片
             plotNumber, //小区number
             streetShow, //是否全局
-            valueSta, //是否有效
+            // effective, //是否有效
             noticeTypeNumber, //轮播时间
             areaCode, //区
             cityCode, //市
@@ -294,15 +317,16 @@ export default {
             streetCode, //小区
             effectiveTime, // 有效时间
             type, // 广告类型
-            startTime,//生效时间
-            glodenStatus,//是否分时广告
+            startTime, //生效时间
+            glodenStatus, //是否分时广告
             glodenTime,
+            remark // 备注
           } = this.form;
           let data = {
             url: files.path ? files.path : "", //图片
             plotNumber: plotNumber ? plotNumber : null, //小区number
             globleStatus: streetShow == true ? 0 : 1, //是否全局
-            effective: valueSta == true ? 0 : 1, //是否有效
+            // effective: effective == true ? 0 : 1, //是否有效
             time: noticeTypeNumber ? noticeTypeNumber : null, //轮播时间
             provinceCode, //省
             cityCode, //市
@@ -311,17 +335,18 @@ export default {
             effectiveTime:
               new Date(effectiveTime).getTime() / 1000 + 24 * 60 * 60 - 1,
             type,
-            startTime: new Date(startTime).getTime()/1000,//生效时间
-            glodenStatus: glodenStatus?0:1,//是否分时广告
-            glodenStart: glodenTime[0].replace(':','.'),//分时开始时间
-            glodenEnd: glodenTime[1].replace(':','.'),////分时结束时间 
+            startTime: new Date(startTime).getTime() / 1000, //生效时间
+            glodenStatus: glodenStatus ? 1 : 0, //是否分时广告  0否，1是
+            glodenStart: glodenStatus ?  glodenTime[0].replace(":", "."):null , //分时开始时间
+            glodenEnd: glodenStatus ? glodenTime[1].replace(":", "."):null   , ////分时结束时间，
+            remark
           };
           console.log(data);
           AddAdvertisementList(data)
             .then(({ errorCode }) => {
               if (errorCode === 0) {
                 this.$Message.success("添加成功!");
-                this.visible=false
+                this.visible = false;
                 this.subIsLoading = false;
               }
             })
@@ -389,11 +414,12 @@ export default {
     opacity: 0;
   }
 }
-.abc{
-  background-color red
-  display flex
-  flex-direction row
-  width 100%
+
+.abc {
+  background-color: red;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
 }
 </style>
 

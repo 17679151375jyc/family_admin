@@ -59,13 +59,13 @@
           <Button type="info" size="small" @click="ChooseLngLat.isShow = true">地图选择</Button>
         </FormItem>
         <FormItem prop="deviceName" label="设备名称">
-          <Input v-model.trim="form.deviceName" placeholder="请输入设备名称" style="width: 200px;" />
+          <Input v-model.trim="form.deviceName" maxlength="20" show-word-limit placeholder="请输入设备名称" style="width: 200px;" />
         </FormItem>
         <FormItem prop="deviceAccount" label="设备账号">
           <Input v-model.trim="form.deviceAccount" placeholder="请输入设备账号" style="width: 200px;" />
         </FormItem>
         <FormItem prop="positionDesc" label="设备位置">
-          <Input v-model.trim="form.positionDesc" placeholder="请输入设备位置描述" style="width:200px;" />
+          <Input v-model.trim="form.positionDesc" maxlength="10" show-word-limit placeholder="请输入设备位置描述" style="width:200px;" />
         </FormItem>
         <FormItem label="logo图片">
           <upload v-model="form.files.path" fileNamePrefix="entranceDevice"></upload>

@@ -233,7 +233,7 @@ export default {
                 h("img", {
                   attrs: {
                     src:
-                      params.row.facePicture ||
+                      this.$options.filters.cutImg(params.row.facePicture) ||
                       require("@/assets/images/none.png")
                   },
                   style: {

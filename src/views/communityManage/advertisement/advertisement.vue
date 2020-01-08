@@ -161,7 +161,7 @@ export default {
         {
           title: "广告",
           key: "url",
-          width: 88,
+          width: 71,
           align: "center",
           render: (h, { row: { url, type } }) => {
             let html = [];
@@ -181,7 +181,7 @@ export default {
               // 图片
               html = h("img", {
                 attrs: {
-                  src: url
+                  src: this.$options.filters.cutImg(url)
                 }
               });
             }
@@ -253,7 +253,7 @@ export default {
           }
         },
         {
-          title: "广告是否有效",
+          title: "是否有效",
           key: "effective",
           minWidth: 80,
           render: (h, { row: { effective } }) => {
@@ -292,6 +292,11 @@ export default {
               globleStatus ? "否" : "是"
             );
           }
+        },
+        {
+          title: "备注",
+          key: "remark",
+          minWidth: 120
         },
         {
           title: "有效时间",

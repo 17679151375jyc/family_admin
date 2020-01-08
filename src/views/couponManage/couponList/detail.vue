@@ -130,8 +130,7 @@
             <span>优惠卷二维码</span>
           </div>
           <div class="text" ref="qrCodeDivAll">
-            <div  ref="qrCodeDiv" style="float: left;"></div>
-
+            <div  ref="qrCodeDiv" style="margin: 10px 0;"></div>
           </div>
         </div>
       </div>
