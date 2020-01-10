@@ -27,16 +27,6 @@
           <span slot="close">无效</span>
         </i-switch>
       </FormItem>
-      <FormItem v-if="form.effective" prop="startTime" label="生效时间">
-        <DatePicker
-          v-model="form.startTime"
-          :options="effectiveTimeOptions"
-          type="datetime"
-          format="yyyy-MM-dd HH:mm"
-          placeholder="请选择生效时间"
-          style="width: 200px"
-        ></DatePicker>
-      </FormItem>
       <FormItem label="是否分时段广告">
         <i-switch size="large" v-model="form.glodenStatus">
           <span slot="open">是</span>
@@ -52,7 +42,7 @@
           v-model="form.glodenTime"
         ></TimePicker>
       </FormItem>
-      <FormItem prop="noticeTypeNumber" label="轮播时间(秒)">
+      <FormItem prop="noticeTypeNumber" label="轮播时间(秒)" v-if='form.type!==0'>
         <Select v-model.trim="form.noticeTypeNumber" placeholder="输入轮播时间" style="width: 140px;">
           <Option :value="5">5s</Option>
           <Option
@@ -61,6 +51,16 @@
             :key="index"
           >{{ item*activeTime }}s</Option>
         </Select>
+      </FormItem>
+      <FormItem v-if="form.effective" prop="startTime" label="生效时间">
+        <DatePicker
+          v-model="form.startTime"
+          :options="effectiveTimeOptions"
+          type="datetime"
+          format="yyyy-MM-dd HH:mm"
+          placeholder="请选择生效时间"
+          style="width: 200px"
+        ></DatePicker>
       </FormItem>
       <FormItem prop="effectiveTime" label="广告有效时间">
         <DatePicker

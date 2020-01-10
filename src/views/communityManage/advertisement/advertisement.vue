@@ -43,6 +43,37 @@
               <Option :value="1">非全局</Option>
             </Select>
           </FormItem>
+          <FormItem prop="glodenTime" label="分时时间段" :label-width="80">
+            <TimePicker
+              type="timerange"
+              format="HH:mm"
+              placeholder="请选择分时时间段"
+              style="width: 140px"
+              hide-disabled-options
+              v-model="glodenTime"
+              @on-change="separateTime"
+            ></TimePicker>
+          </FormItem>
+          <FormItem label="生效时间段" :label-width="80">
+            <DatePicker
+              ref="dataTimePicker1"
+              type="datetimerange"
+              v-model.trim="dateTimeVal"
+              @on-change="timeChangeFunc"
+              placeholder="选择查询的时间段"
+              style="width: 280px"
+            ></DatePicker>
+          </FormItem>
+          <FormItem label="有效时间段" :label-width="80">
+            <DatePicker
+              ref="dataTimePicker"
+              type="datetimerange"
+              v-model.trim="dateTime"
+              @on-change="timeChange"
+              placeholder="选择查询的时间段"
+              style="width: 280px"
+            ></DatePicker>
+          </FormItem>
         </Form>
         <ButtonGroup class="btns">
           <Button class="search-btn" type="primary" icon="md-search" @click="search">搜索</Button>
@@ -107,6 +138,8 @@ export default {
   },
   data() {
     return {
+      timeValue: null,
+      glodenTime: [],
       arrdessPolt: [],
       AdvertisementType: this.$options.filters.statusList("AdvertisementType"),
       page: {
@@ -115,6 +148,8 @@ export default {
         sizeOpts: this.$config.page.sizeOpts,
         current: 1
       },
+      dateTimeVal: [],
+      dateTime: [],
       searchForm: {
         input: {
           type: null,
@@ -124,7 +159,11 @@ export default {
           streetCode: null,
           plotNumber: null,
           effective: null,
-          globleStatus: null
+          globleStatus: null,
+          glodenStart: null,
+          glodenEnd: null,
+          effectiveStartTime: null,
+          effectiveEndTime: null,
         }
       },
       companyTypeList: this.$config.dataManage.company.type,
@@ -272,14 +311,14 @@ export default {
         {
           title: "轮播时间",
           key: "time",
-          minWidth: 120,
+          minWidth: 80,
           render: (h, { row: { time } }) => {
             return h("div", time ? time + "秒" : "");
           }
         },
         {
           title: "是否全局",
-          minWidth: 120,
+          minWidth: 80,
           render: (h, { row: { globleStatus } }) => {
             return h(
               "div",
@@ -294,9 +333,46 @@ export default {
           }
         },
         {
+          title: "是否分时",
+          minWidth: 80,
+          render: (h, { row: { glodenStatus=null } }) => {
+            return h(
+              "div",
+              {
+                class: {
+                  "cell-error": !glodenStatus,
+                  "cell-success": glodenStatus
+                }
+              },
+              glodenStatus ? "是" : "否"
+            );
+          }
+        },
+        {
+          title: "分时时间段",
+          minWidth: 120,
+          render: (h, { row: { glodenStatus, glodenStart, glodenEnd } }) => {
+            return h(
+              "div",
+              glodenStatus?
+              this.getGlodenTime(glodenStart)+'-'+this.getGlodenTime(glodenEnd):'00:00-24:00'
+            );
+          }
+        },
+        {
           title: "备注",
           key: "remark",
           minWidth: 120
+        },
+        {
+          title: "生效时间",
+          minWidth: 150,
+          render: (h, { row: { startTime } }) => {
+            return h(
+              "div",              
+              this.$moment(startTime * 1000).format("YYYY-MM-DD HH:mm:ss")
+            );
+          }
         },
         {
           title: "有效时间",
@@ -462,6 +538,31 @@ export default {
     this.getList();
   },
   methods: {
+    separateTime(val){
+      if(val){
+        this.searchForm.input.glodenStart = this.getTimeText(val[0])
+        this.searchForm.input.glodenEnd = this.getTimeText(val[1])
+      }else{
+        this.searchForm.input.glodenStart = null
+        this.searchForm.input.glodenEnd = null
+      }
+    },
+    //数值转化为时间格式
+    getGlodenTime(startTime) {
+      if (startTime || startTime === 0) {
+        startTime = startTime < 10 ? "0" + startTime : startTime + "";
+        startTime =
+          startTime.indexOf(".") > -1
+            ? startTime.replace(".", ":")
+            : startTime + ":00";
+        startTime = startTime.length < 5 ? startTime + "0" : startTime;
+      }
+      return startTime;
+    },
+    //时间格式转化为数值
+    getTimeText(value){
+      return +value.replace(':', '.')
+    },
     /**
      * @method getList 获取当前的数据列表
      */
@@ -493,6 +594,36 @@ export default {
         .catch(err => {
           this.tabIsLoading = false;
         });
+    },
+    /**
+     * 选择生效时间后
+     */
+    timeChange() {
+      if (this.dateTime[0]) {
+        this.searchForm.input.effectiveStartTime = new Date(this.dateTime[0])
+          .getTime()
+          .toString()
+          .substr(0, 10);
+        this.searchForm.input.effectiveEndTime = new Date(this.dateTime[1])
+          .getTime()
+          .toString()
+          .substr(0, 10);
+      }
+    },
+    /**
+     * 选择有效时间后
+     */
+    timeChangeFunc() {
+      if (this.dateTimeVal[0]) {
+        this.searchForm.input.createTime = new Date(this.dateTimeVal[0])
+          .getTime()
+          .toString()
+          .substr(0, 10);
+        this.searchForm.input.endTime = new Date(this.dateTimeVal[1])
+          .getTime()
+          .toString()
+          .substr(0, 10);
+      }
     },
     /**
      * @method delItem 删除该项数据
@@ -588,9 +719,17 @@ export default {
     resetSearch() {
       this.$refs["search-form"].resetFields();
       this.$refs["addressCascader"].resetData();
+      this.$refs["dataTimePicker"].handleClear();
+      this.$refs["dataTimePicker1"].handleClear();
       this.searchForm.daterange = null;
-      this.searchForm.startTime = null;
-      this.searchForm.endTime = null;
+      this.searchForm.input.glodenStart = null
+      this.searchForm.input.glodenEnd = null
+      this.searchForm.input.effectiveStartTime = null
+      this.searchForm.input.effectiveEndTime = null
+      this.searchForm.input.createTime = null
+      this.searchForm.input.endTime = null
+      this.timeValue = null
+      this.glodenTime = null
       this.page.current = 1;
       this.getList();
     },

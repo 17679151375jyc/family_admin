@@ -35,24 +35,6 @@
           ></address-cascader>
         </div>
       </FormItem>
-
-      <!-- <FormItem label="是否有效">
-        <i-switch size="large" @on-change="effecTiveChang">
-          <span slot="open">有效</span>
-          <span slot="close">无效</span>
-        </i-switch>
-      </FormItem> -->
-
-      <FormItem prop="startTime" label="生效时间">
-        <DatePicker
-          v-model="form.startTime"
-          :options="effectiveTimeOptions"
-          type="date"
-          format="yyyy-MM-dd"
-          placeholder="请选择生效时间"
-          style="width: 140px"
-        ></DatePicker>
-      </FormItem>
       <FormItem label="是否分时段广告">
         <i-switch size="large" @on-change="effecTiveChangKing">
           <span slot="open">是</span>
@@ -78,6 +60,16 @@
             :key="index"
           >{{ item*activeTime }}s</Option>
         </Select>
+      </FormItem>
+      <FormItem prop="startTime" label="生效时间">
+        <DatePicker
+          v-model="form.startTime"
+          :options="effectiveTimeOptions"
+          type="date"
+          format="yyyy-MM-dd"
+          placeholder="请选择生效时间"
+          style="width: 140px"
+        ></DatePicker>
       </FormItem>
       <FormItem prop="effectiveTime" label="广告有效时间">
         <DatePicker
@@ -249,7 +241,7 @@ export default {
       if (!val) {
         this.$refs["form"].resetFields();
         this.$refs["addressCascader"] &&
-          this.$refs["addressCascader"].resetData();
+        this.$refs["addressCascader"].resetData();
       }
     },
     visible(val) {
@@ -299,7 +291,6 @@ export default {
       }
     },
     effecTiveChangKing(data) {
-      console.log(data)
       this.form.glodenStatus = data ? 1 : 0;
     },
     submit() {

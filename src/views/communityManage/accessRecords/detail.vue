@@ -17,46 +17,72 @@
       <div class="row">
         <div class="item">
           <div class="label">
-            <i class="iconfont iconyonghu"></i>
-            <span>姓名</span>
-          </div>
-          <div class="text">{{info.roleName}}</div>
-        </div>
-
-        <div class="item">
-          <div class="label">
-            <i class="iconfont iconleixing-zidingyi"></i>
-            <span>类型</span>
-          </div>
-          <div class="text">{{info.roleType | statusName('RelationType')}}</div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="item">
-          <div class="label">
             <i class="iconfont iconjianzhuwu"></i>
-            <span>小区</span>
+            <span>社区名称</span>
           </div>
           <div class="text">{{info.plotName}}</div>
         </div>
 
         <div class="item">
           <div class="label">
-            <i class="iconfont iconicon-test"></i>
+            <i class="iconfont iconjianzhuwu"></i>
             <span>楼座</span>
           </div>
           <div class="text">{{info.buildingName}}</div>
         </div>
       </div>
-      <!-- <div class="row">
+      <div class="row">
         <div class="item">
           <div class="label">
             <i class="iconfont iconmenchuangmenchuangwujinanzhuang"></i>
-            <span>户号</span>
+            <span>业主户号</span>
           </div>
           <div class="text">{{info.doorName}}</div>
         </div>
 
+        <div class="item">
+          <div class="label">
+            <i class="iconfont icondizhi1"></i>
+            <span>位置</span>
+          </div>
+          <div class="text">{{info.positionName}}</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconwenhao"></i>
+            <span>是否开门</span>
+          </div>
+          <div class="text">{{$options.filters.statusName(info.openStatus, "OpenStatus")}}</div>
+        </div>
+
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconleixing-zidingyi"></i>
+            <span>记录类型</span>
+          </div>
+          <div class="text">{{ $options.filters.statusName(info.openType, "OpenType")}}</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconleixing-guibingjiedian"></i>
+            <span>出入类型</span>
+          </div>
+          <div class="text">{{info.recordType | statusName('RecordType')}}</div>
+        </div>
+
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconleixing-zidingyi"></i>
+            <span>姓名</span>
+          </div>
+          <div class="text">{{info.roleName}}</div>
+        </div>
+      </div>
+      <div class="row">
         <div class="item">
           <div class="label">
             <i class="iconfont iconyonghu"></i>
@@ -64,33 +90,30 @@
           </div>
           <div class="text">{{info.realName}}</div>
         </div>
-      </div> -->
 
-      <div class="row">
-        <!-- <div class="item">
+        <div class="item">
           <div class="label">
             <i class="iconfont iconshouji"></i>
             <span>业主电话</span>
           </div>
           <div class="text">{{info.phone}}</div>
-        </div> -->
-
-        <div class="item">
-          <div class="label">
-            <i class="iconfont iconstatus"></i>
-            <span>出入类型</span>
-          </div>
-          <div class="text">{{info.recordType | statusName('RecordType')}}</div>
         </div>
       </div>
-
       <div class="row">
         <div class="item">
           <div class="label">
-            <i class="iconfont iconshijian"></i>
-            <span>时间</span>
+            <i class="iconfont iconjiaoseguanli"></i>
+            <span>角色</span>
           </div>
-          <div class="text">{{info.triggeringTime|formatTime}}</div>
+          <div class="text">{{$options.filters.statusName(info.roleType ,"RelationType")}}</div>
+        </div>
+
+        <div class="item">
+          <div class="label">
+            <i class="iconfont iconshijian"></i>
+            <span>出入时间</span>
+          </div>
+          <div class="text">{{$options.filters.formatTime(info.triggeringTime)}}</div>
         </div>
       </div>
     </div>
@@ -118,14 +141,16 @@ export default {
       info: {
         plotName: null,
         buildingName: null,
+        doorName: null,
         positionName: null,
+        openStatus: null,
+        openType: null,
         recordType: null,
         roleName: null,
+        realName: null,
+        phone: null,
         roleType: null,
         triggeringTime: null,
-        phone: null,
-        realName: null,
-        doorName: null,
       }
     };
   },

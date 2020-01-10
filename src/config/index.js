@@ -17,7 +17,7 @@ export default {
      * @description api请求基础路径
      */
     baseUrl: {
-        development: 'http://172.31.1.168:8182/family/', // 开发环境地址  http://172.31.1.162:8182
+        development: 'http://172.31.1.202:8182/family/', // 开发环境地址  http://172.31.1.162:8182
         test: 'https://' + window.location.host + '/family/', // 测试环境地址 //https://mickw.club/family  http://jtbhtcs.cn1.utools.club/family/
         production: 'https://' + window.location.host + '/family/', // 生产环境地址 'http://jtbhtcs.cn1.utools.club/family/'
         // dev: '/',
